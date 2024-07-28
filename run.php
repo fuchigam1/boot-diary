@@ -108,11 +108,14 @@ class Run {
     }
 
     private function init($argv) {
-        $this->checkEnviroment();
+        $this->checkEnviroment($argv);
         $this->checkArguments($argv);
     }
 
-    private function checkEnviroment() {
+    private function checkEnviroment($argv) {
+        if (isset($argv[1]) && $argv[1] === 'init') {
+            return;
+        }
         // 各templateファイルが存在するかを確認する
         $templateFiles = [
             'format-footer.template.md',

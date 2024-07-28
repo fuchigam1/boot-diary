@@ -1,0 +1,39 @@
+<?php
+// TodoistのAPIトークンを設定
+if (!defined('YOUR_TODOIST_API_TOKEN')) {
+    define('YOUR_TODOIST_API_TOKEN', '');
+}
+
+// Todoistのタスク一覧から除外するプロジェクト名を配列で指定
+if (!defined('EXCLUDE_PROJECTS_FOR_TODOIST')) {
+    define('EXCLUDE_PROJECTS_FOR_TODOIST', []);
+}
+
+// TogglのAPIトークンを設定
+if (!defined('YOUR_TOGGL_API_TOKEN')) {
+    define('YOUR_TOGGL_API_TOKEN', '');
+}
+
+// TogglのWORKSPACE_IDを設定
+// https://track.toggl.com/settings にアクセスした際のURLの https://track.toggl.com/{この数字}/settings/general
+if (!defined('YOUR_TOGGL_WORKSPACE_ID')) {
+    define('YOUR_TOGGL_WORKSPACE_ID', '');
+}
+
+// Togglから取得した一覧から除外するプロジェクト名の配列
+if (!defined('EXCLUDE_PROJECTS_FOR_TOGGL')) {
+    define('EXCLUDE_PROJECTS_FOR_TOGGL', []);
+}
+
+// Togglから取得した一覧から、タグが付いてる記録を除外する
+if (!defined('EXCLUDE_HASTAG_FOR_TOGGL')) {
+    define('EXCLUDE_HASTAG_FOR_TOGGL', false);
+}
+
+// Togglにログインするためのメールアドレスとパスワード
+if (!defined('YOUR_TOGGL_EMAIL')) {
+    define('YOUR_TOGGL_EMAIL', '');
+}
+if (!defined('YOUR_TOGGL_PASSWORD')) {
+    define('YOUR_TOGGL_PASSWORD', '');
+}

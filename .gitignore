@@ -1,0 +1,20 @@
+## IDE files and folders
+.cache
+.project
+.settings
+nbproject
+.idea
+.DS_Store
+_notes
+.svn
+.vscode/*
+.tmp/*
+!.tmp/empty
+template/*
+!template/empty
+
+## Allow 'empty' files
+!empty
+
+## exclude files
+lib/setting.php

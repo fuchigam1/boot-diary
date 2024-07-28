@@ -1,0 +1,131 @@
+<?php
+
+class Toggl {
+    private $apiToken;
+    private $workspaceId;
+    private $projects;
+
+    public function __construct() {
+        if (defined('YOUR_TOGGL_API_TOKEN') && !empty(YOUR_TOGGL_API_TOKEN)) {
+            $this->apiToken = YOUR_TOGGL_API_TOKEN;
+        } else {
+            echo getColorLog("Toggl APIトークンが設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        if (defined('YOUR_TOGGL_WORKSPACE_ID') && !empty(YOUR_TOGGL_WORKSPACE_ID)) {
+            $this->workspaceId = YOUR_TOGGL_WORKSPACE_ID;
+        } else {
+            echo getColorLog("TogglワークスペースIDが設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        $this->projects = $this->getProjects();
+    }
+
+    /**
+     * Togglに記録しているサマリーを取得する
+     *
+     * @param string $date
+     * @return array
+     * @link https://engineering.toggl.com/docs/reports/summary_reports#post-search-time-entries
+     */
+    public function getTimeEntries($date) {
+        $startDate = date('Y-m-d', strtotime($date));
+        $endDate = date('Y-m-d', strtotime($date . ' +1 day'));
+
+        $url = "https://api.track.toggl.com/reports/api/v3/workspace/$this->workspaceId/search/time_entries";
+
+        $postData = json_encode([
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'user_agent' => 'api_test',
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->apiToken . ':api_token');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($postData),
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+        $response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
+
+        return json_decode($response, true);
+    }
+
+    /**
+     * プロジェクト一覧を取得する
+     *
+     * @return array
+     */
+    private function getProjects() {
+        $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_toggl.json';
+        if (!file_exists($filePath)) {
+            echo getColorLog("Togglプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');
+            return [];
+        }
+
+        $projects = json_decode(file_get_contents($filePath), true);
+        return $projects;
+    }
+
+    private function formatDuration($seconds) {
+        $minutes = $seconds / 60;
+        return round($minutes) . '分';
+    }
+
+    public function execute($date) {
+        if (!$this->apiToken || !$this->workspaceId) {
+            return;
+        }
+
+        $filePath = APP_ROOT . DS . $date . '.md';
+        // ファイルに追記
+        if (file_exists($filePath)) {
+            $content = file_get_contents($filePath);
+        } else {
+            $content = "## 内容\n";
+        }
+
+        // 日付のタイムエントリーを取得
+        $timeEntries = $this->getTimeEntries($date);
+        if (!$timeEntries) {
+            echo getColorLog("Togglのタイムエントリーが取得できませんでした" . PHP_EOL, 'error');
+            return;
+        }
+
+        // '## 内容' の直上に追加
+        $newContent = "## 活動 Toggl Summary Reports\n\n";
+        foreach ($timeEntries as $entry) {
+            // タグがあるエントリーを除外
+            if (EXCLUDE_HASTAG_FOR_TOGGL && isset($entry['tag_ids']) && count($entry['tag_ids']) > 0) {
+                continue;
+            }
+
+            $projectName = isset($entry['project_id']) ? $this->projects[$entry['project_id']] : 'Without project';
+
+            // プロジェクト名が EXCLUDE_PROJECTS_FOR_TOGGL に含まれているか確認
+            if (in_array($projectName, EXCLUDE_PROJECTS_FOR_TOGGL)) {
+                continue;
+            }
+
+            foreach ($entry['time_entries'] as $item) {
+                $duration = $this->formatDuration($item["seconds"]);
+                $newContent .= "- " . $projectName . " " . $entry['description'] . " (" . $duration . ")\n";
+            }
+        }
+
+        $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);
+        file_put_contents($filePath, $content);
+
+        echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'notice');
+    }
+}

@@ -79,7 +79,7 @@ class Toggl {
 
     private function formatDuration($seconds) {
         $minutes = $seconds / 60;
-        return round($minutes) . '分';
+        return floor($minutes);
     }
 
     public function execute($date) {
@@ -102,8 +102,8 @@ class Toggl {
             return;
         }
 
-        // '## 内容' の直上に追加
-        $newContent = "## 活動 Toggl Summary Reports\n\n";
+        // データの整理と集約
+        $entriesByProjectAndDescription = [];
         foreach ($timeEntries as $entry) {
             // タグがあるエントリーを除外
             if (EXCLUDE_HASTAG_FOR_TOGGL && isset($entry['tag_ids']) && count($entry['tag_ids']) > 0) {
@@ -117,10 +117,49 @@ class Toggl {
                 continue;
             }
 
+            $description = $entry['description'];
+            $totalSeconds = 0;
+
             foreach ($entry['time_entries'] as $item) {
-                $duration = $this->formatDuration($item["seconds"]);
-                $newContent .= "- " . $projectName . " " . $entry['description'] . " (" . $duration . ")\n";
+                $totalSeconds += $item['seconds'];
             }
+
+            if (!isset($entriesByProjectAndDescription[$projectName])) {
+                $entriesByProjectAndDescription[$projectName] = [];
+            }
+
+            if (!isset($entriesByProjectAndDescription[$projectName][$description])) {
+                $entriesByProjectAndDescription[$projectName][$description] = 0;
+            }
+
+            $entriesByProjectAndDescription[$projectName][$description] += $totalSeconds;
+        }
+
+        // プロジェクト名でソート
+        ksort($entriesByProjectAndDescription);
+
+        // $entriesByProjectAndDescription を $duration の降順でソート
+        $sortedEntries = [];
+        foreach ($entriesByProjectAndDescription as $projectName => $descriptions) {
+            foreach ($descriptions as $description => $totalSeconds) {
+                $sortedEntries[] = [
+                    'project' => $projectName,
+                    'description' => $description,
+                    'totalSeconds' => $totalSeconds,
+                ];
+            }
+        }
+
+        // $totalSeconds で降順ソート
+        usort($sortedEntries, function($a, $b) {
+            return $b['totalSeconds'] - $a['totalSeconds'];
+        });
+
+        // '## 内容' の直上に追加
+        $newContent = "## 活動 Toggl Summary Reports\n\n";
+        foreach ($sortedEntries as $entry) {
+            $duration = $this->formatDuration($entry['totalSeconds']);
+            $newContent .= "- " . $entry['project'] . " " . $entry['description'] . " " . $duration . PHP_EOL;
         }
 
         $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);

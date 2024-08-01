@@ -20,12 +20,15 @@ class Format
         $this->today = date('Ymd'); // 今日の日付を取得
     }
 
-    public function execute()
+    public function execute($argv)
     {
+        $specifiedDate = $argv[2] ?? null;
+        $dateToProcess = $specifiedDate ?? $this->today;
+
         // 今日の日付に基づいてフォルダとファイルを作成・移動
         $baseDir = __DIR__ . '/../';
-        $yearDir = $baseDir . date('Y');
-        $monthDir = $yearDir . '/' . date('m');
+        $yearDir = $baseDir . substr($dateToProcess, 0, 4);
+        $monthDir = $yearDir . '/' . substr($dateToProcess, 4, 2);
 
         if (!is_dir($yearDir)) {
             mkdir($yearDir, 0777, true);
@@ -34,8 +37,8 @@ class Format
             mkdir($monthDir, 0777, true);
         }
 
-        $filePath = $baseDir . $this->today . $this->fileExtension;
-        $destinationPath = $monthDir . '/' . $this->today . $this->fileExtension;
+        $filePath = $baseDir . $dateToProcess . $this->fileExtension;
+        $destinationPath = $monthDir . '/' . $dateToProcess . $this->fileExtension;
 
         if (!file_exists($filePath)) {
             echo getColorLog("ファイル $filePath は存在しません". PHP_EOL, 'error');

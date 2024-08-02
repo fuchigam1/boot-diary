@@ -23,10 +23,32 @@ class Format
     public function execute($argv)
     {
         $specifiedDate = $argv[2] ?? null;
-        $dateToProcess = $specifiedDate ?? $this->today;
 
-        // 今日の日付に基づいてフォルダとファイルを作成・移動
+        if ($specifiedDate) {
+            // Y-m-d 形式または Ymd 形式の日付を DateTime オブジェクトに変換
+            $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate) ?: DateTime::createFromFormat('Ymd', $specifiedDate);
+
+            // 日付が有効かどうかを確認
+            if ($dateTime && ($dateTime->format('Y-m-d') === $specifiedDate || $dateTime->format('Ymd') === $specifiedDate)) {
+                $dateToProcess = $dateTime->format('Ymd');
+            } else {
+                echo getColorLog("無効な日付が指定されました: $specifiedDate" . PHP_EOL, 'error');
+                exit;
+            }
+        } else {
+            $dateToProcess = $this->today;
+        }
+
+        // ファイルパスの構築
         $baseDir = __DIR__ . '/../';
+        $filePath = $baseDir . $dateToProcess . $this->fileExtension;
+
+        if (!file_exists($filePath)) {
+            echo getColorLog("$dateToProcess.md は存在しません". PHP_EOL, 'error');
+            exit;
+        }
+
+        // フォルダの作成とファイルの移動
         $yearDir = $baseDir . substr($dateToProcess, 0, 4);
         $monthDir = $yearDir . '/' . substr($dateToProcess, 4, 2);
 
@@ -37,20 +59,13 @@ class Format
             mkdir($monthDir, 0777, true);
         }
 
-        $filePath = $baseDir . $dateToProcess . $this->fileExtension;
         $destinationPath = $monthDir . '/' . $dateToProcess . $this->fileExtension;
-
-        if (!file_exists($filePath)) {
-            echo getColorLog("ファイル $filePath は存在しません". PHP_EOL, 'error');
-            exit;
-        }
 
         if (file_exists($destinationPath)) {
             $this->confirmOverwrite($destinationPath);
         }
 
         rename($filePath, $destinationPath);
-
         $this->updateReadme();
 
         echo getColorLog("ファイルを移動し、README.md を更新しました". PHP_EOL, 'info');

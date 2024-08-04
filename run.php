@@ -35,7 +35,7 @@ class Run {
                 break;
             case 'new':
                 $new = new DailyReportCreator();
-                $new->execute();
+                $new->execute($argv);
                 break;
             case 'format':
                 $format = new Format();

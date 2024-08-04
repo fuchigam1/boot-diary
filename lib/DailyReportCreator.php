@@ -13,9 +13,22 @@ class DailyReportCreator
         $this->templatePath = __DIR__ . '/../template/new.template.md';
     }
 
-    public function execute()
+    public function execute($argv)
     {
-        $date = date($this->dateFormat);
+        // コマンドライン引数から日付を取得
+        $inputDate = $argv[2] ?? null;
+
+        if ($inputDate) {
+            if (!Validation::isValidDate($inputDate)) {
+                echo getColorLog("無効な日付指定です: $inputDate" . PHP_EOL, 'error');
+                exit;
+            }
+            $date = date($this->dateFormat, strtotime($inputDate));
+        } else {
+            // 引数が指定されていない場合は現在の日付を使用
+            $date = date($this->dateFormat);
+        }
+
         $fileName = "$date.md";
         $filePath = __DIR__ . '/../' . $fileName;
 
@@ -31,8 +44,8 @@ class DailyReportCreator
         }
 
         $templateContent = file_get_contents($this->templatePath);
-        $dayOfWeek = getDayOfWeek(date('w'));
-        $templateContent = str_replace('{{date}}', date('Y-m-d'), $templateContent);
+        $dayOfWeek = getDayOfWeek(date('w', strtotime($date)));
+        $templateContent = str_replace('{{date}}', date('Y-m-d', strtotime($date)), $templateContent);
         $templateContent = str_replace('{{day_of_week}}', $dayOfWeek, $templateContent);
 
         // TODOISTのタスクを取得して追加する
@@ -53,6 +66,7 @@ class DailyReportCreator
         file_put_contents($filePath, $templateContent);
 
         echo getColorLog("日報ファイル '$fileName' を作成しました". PHP_EOL, 'info');
-        echo getColorLog(APP_ROOT .DS. $fileName . PHP_EOL, 'info');
+        echo getColorLog(APP_ROOT . DS . $fileName . PHP_EOL, 'info');
     }
+
 }

@@ -22,17 +22,16 @@ class Format
 
     public function execute($argv)
     {
+        // コマンドライン引数から日付を取得
         $specifiedDate = $argv[2] ?? null;
 
         if ($specifiedDate) {
-            // Y-m-d 形式または Ymd 形式の日付を DateTime オブジェクトに変換
-            $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate) ?: DateTime::createFromFormat('Ymd', $specifiedDate);
-
-            // 日付が有効かどうかを確認
-            if ($dateTime && ($dateTime->format('Y-m-d') === $specifiedDate || $dateTime->format('Ymd') === $specifiedDate)) {
+            if (Validation::isValidDate($specifiedDate)) {
+                // Y-m-d 形式または Ymd 形式の日付を DateTime オブジェクトに変換
+                $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate) ?: DateTime::createFromFormat('Ymd', $specifiedDate);
                 $dateToProcess = $dateTime->format('Ymd');
             } else {
-                echo getColorLog("無効な日付が指定されました: $specifiedDate" . PHP_EOL, 'error');
+                echo getColorLog("無効な日付指定です: $specifiedDate" . PHP_EOL, 'error');
                 exit;
             }
         } else {

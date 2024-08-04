@@ -4,6 +4,7 @@ class Toggl {
     private $apiToken;
     private $workspaceId;
     private $projects;
+    private $dateFormat;
 
     public function __construct() {
         if (defined('YOUR_TOGGL_API_TOKEN') && !empty(YOUR_TOGGL_API_TOKEN)) {
@@ -20,71 +21,26 @@ class Toggl {
             return;
         }
 
+        $this->dateFormat = 'Ymd';
         $this->projects = $this->getProjects();
     }
 
-    /**
-     * Togglに記録しているサマリーを取得する
-     *
-     * @param string $date
-     * @return array
-     * @link https://engineering.toggl.com/docs/reports/summary_reports#post-search-time-entries
-     */
-    public function getTimeEntries($date) {
-        $startDate = date('Y-m-d', strtotime($date));
-        $endDate = date('Y-m-d', strtotime($date . ' +1 day'));
-
-        $url = "https://api.track.toggl.com/reports/api/v3/workspace/$this->workspaceId/search/time_entries";
-
-        $postData = json_encode([
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'user_agent' => 'api_test',
-        ]);
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERPWD, $this->apiToken . ':api_token');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($postData),
-        ]);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
-        $response = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
-        }
-        curl_close($ch);
-
-        return json_decode($response, true);
-    }
-
-    /**
-     * プロジェクト一覧を取得する
-     *
-     * @return array
-     */
-    private function getProjects() {
-        $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_toggl.json';
-        if (!file_exists($filePath)) {
-            echo getColorLog("Togglプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');
-            return [];
-        }
-
-        $projects = json_decode(file_get_contents($filePath), true);
-        return $projects;
-    }
-
-    private function formatDuration($seconds) {
-        $minutes = $seconds / 60;
-        return floor($minutes);
-    }
-
-    public function execute($date) {
+    public function execute($argv) {
         if (!$this->apiToken || !$this->workspaceId) {
             return;
+        }
+
+        // コマンドライン引数から日付を取得
+        $inputDate = $argv[2] ?? null;
+        if ($inputDate) {
+            if (!Validation::isValidDate($inputDate)) {
+                echo getColorLog("無効な日付指定です: $inputDate" . PHP_EOL, 'error');
+                exit;
+            }
+            $date = date($this->dateFormat, strtotime($inputDate));
+        } else {
+            // 引数が指定されていない場合は現在の日付を使用
+            $date = date($this->dateFormat);
         }
 
         $filePath = APP_ROOT . DS . $date . '.md';
@@ -167,4 +123,64 @@ class Toggl {
 
         echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'notice');
     }
+
+    /**
+     * Togglに記録しているサマリーを取得する
+     *
+     * @param string $date
+     * @return array
+     * @link https://engineering.toggl.com/docs/reports/summary_reports#post-search-time-entries
+     */
+    public function getTimeEntries($date) {
+        $startDate = date('Y-m-d', strtotime($date));
+        $endDate = date('Y-m-d', strtotime($date . ' +1 day'));
+
+        $url = "https://api.track.toggl.com/reports/api/v3/workspace/$this->workspaceId/search/time_entries";
+
+        $postData = json_encode([
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'user_agent' => 'api_test',
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->apiToken . ':api_token');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($postData),
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+        $response = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
+
+        return json_decode($response, true);
+    }
+
+    /**
+     * プロジェクト一覧を取得する
+     *
+     * @return array
+     */
+    private function getProjects() {
+        $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_toggl.json';
+        if (!file_exists($filePath)) {
+            echo getColorLog("Togglプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');
+            return [];
+        }
+
+        $projects = json_decode(file_get_contents($filePath), true);
+        return $projects;
+    }
+
+    private function formatDuration($seconds) {
+        $minutes = $seconds / 60;
+        return floor($minutes);
+    }
+
 }

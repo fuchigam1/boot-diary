@@ -46,13 +46,8 @@ class Run {
                 $generateFile->execute();
                 break;
             case 'toggl':
-                if (isset($argv[2])) {
-                    $date = $argv[2];
-                } else {
-                    $date = date('Ymd');
-                }
                 $toggl = new Toggl();
-                $toggl->execute($date);
+                $toggl->execute($argv);
                 break;
             default:
                 $manual = $this->getManual();

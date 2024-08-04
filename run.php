@@ -1,5 +1,6 @@
 <?php
 require_once 'lib/common.php';
+require_once 'lib/Validation.php';
 require_once 'lib/Init.php';
 require_once 'lib/DailyReportCreator.php';
 require_once 'lib/Format.php';

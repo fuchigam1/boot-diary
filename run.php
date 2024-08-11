@@ -12,7 +12,7 @@ require_once 'lib/Todoist.php';
 # 実行
 # -------------------------------------------------
 $Run = new Run($argv);
-$Run->exec($argv);
+$Run->exec();
 
 class Run {
     private $allowCommand = [
@@ -22,11 +22,16 @@ class Run {
         'format',
         'generate',
     ];
+    private $argv;
 
-    public function exec($argv) {
-        $this->init($argv);
+    public function __construct($argv) {
+        $this->argv = $argv;
+    }
 
-        $command = $argv[1] ?? '';
+    public function exec() {
+        $this->init($this->argv);
+
+        $command = $this->argv[1] ?? '';
 
         switch ($command) {
             case 'init':
@@ -35,11 +40,11 @@ class Run {
                 break;
             case 'new':
                 $new = new DailyReportCreator();
-                $new->execute($argv);
+                $new->execute($this->argv);
                 break;
             case 'format':
                 $format = new Format();
-                $format->execute($argv);
+                $format->execute($this->argv);
                 break;
             case 'generate':
                 $generateFile = new GenerateFile();
@@ -47,11 +52,11 @@ class Run {
                 break;
             case 'toggl':
                 $toggl = new Toggl();
-                $toggl->execute($argv);
+                $toggl->execute($this->argv);
                 break;
             default:
                 $manual = $this->getManual();
-                if (!isset($argv[1])) {
+                if (!isset($this->argv[1])) {
                     if (isCli()) {
                         echo $manual;
                     } else {

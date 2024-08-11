@@ -44,7 +44,7 @@ class DailyReportCreator
         }
 
         $templateContent = file_get_contents($this->templatePath);
-        $dayOfWeek = getDayOfWeek(date('w', strtotime($date)));
+        $dayOfWeek = getDayOfWeek((int)date('w', strtotime($date)));
         $templateContent = str_replace('{{date}}', date('Y-m-d', strtotime($date)), $templateContent);
         $templateContent = str_replace('{{day_of_week}}', $dayOfWeek, $templateContent);
 

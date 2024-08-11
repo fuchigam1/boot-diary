@@ -24,7 +24,7 @@ if (file_exists($settingPath)) {
  * @link 色指定 https://misc.flogisoft.com/bash/tip_colors_and_formatting
  * @link 種別 https://www.php-fig.org/psr/psr-3/#5-psrlogloglevel
  */
-function getColorLog($str, $type = '') {
+function getColorLog(string $str, $type = ''): string {
     $string = '';
 
     // error = 'emergency' // Red
@@ -64,7 +64,7 @@ function getColorLog($str, $type = '') {
  * CLI実行かどうか判定する
  * @return boolean
  */
-function isCli() {
+function isCli(): bool {
     if (PHP_SAPI === 'cli') {
         return true;
     }
@@ -74,7 +74,7 @@ function isCli() {
 /**
  * htmlspecialcharsエイリアス
  */
-function h($str) {
+function h(string $str): string {
     return htmlspecialchars($str);
 }
 
@@ -83,7 +83,7 @@ function h($str) {
  * @param int $dayNumber
  * @return string
  */
-function getDayOfWeek($dayNumber) {
+function getDayOfWeek(int $dayNumber): string {
     $daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
     return $daysOfWeek[$dayNumber];
 }
@@ -91,7 +91,7 @@ function getDayOfWeek($dayNumber) {
 /**
  * バージョンを取得する
  */
-function getVersion() {
+function getVersion(): string {
     $versionNo = '';
 
     $path = APP_ROOT . DS . 'lib' . DS . 'VERSION.txt';

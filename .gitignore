@@ -12,6 +12,8 @@ _notes
 !.tmp/empty
 template/*
 !template/empty
+.phpdoc/*
+build/*
 
 ## Allow 'empty' files
 !empty

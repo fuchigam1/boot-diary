@@ -127,10 +127,8 @@ class Format
 
                         $fileLinks .= "- [$fileName $dayOfWeek](./$year/$month/$fileName)\n";
                     }
-                    if (!empty($fileLinks)) {
-                        $monthSection = "### $month\n\n" . $fileLinks . "\n";
-                        $monthContent .= $monthSection;
-                    }
+                    $monthSection = "### $month\n\n" . $fileLinks . "\n";
+                    $monthContent .= $monthSection;
                 }
             }
 

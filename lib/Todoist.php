@@ -25,12 +25,6 @@ class Todoist {
             return [];
         }
 
-        // ヘッダーを設定
-        $headers = [
-            'Authorization: Bearer ' . $this->apiToken,
-            'Content-Type: application/json',
-        ];
-
         // メッセージを表示
         echo getColorLog("Todoistからタスクを取得しています。この処理には少し時間がかかるのでお待ちください" . PHP_EOL, 'notice');
 
@@ -42,25 +36,44 @@ class Todoist {
             }
         }
 
+        // ヘッダーを設定
+        $headers = [
+            'Authorization: Bearer ' . $this->apiToken,
+            'Content-Type: application/json',
+        ];
+
         $ch = curl_init('https://api.todoist.com/rest/v2/tasks');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        // タイムアウト設定（適宜調整）
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        // ドット表示プロセスをフォーク（LinuxやmacOSで使えるが、Windowsでは互換性のある方法を使う必要がある）
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die('プロセスの作成に失敗しました');
+        } elseif ($pid == 0) {
+            // 子プロセス: ドットを表示
+            displayDots();
+            exit;
+        } else {
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-        if ($httpCode !== 200) {
-            echo getColorLog(PHP_EOL . "APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
-            return [];
+            // 子プロセスを終了させる
+            posix_kill($pid, SIGTERM);
+
+            // cURLの処理が終わったら改行
+            echo PHP_EOL;
+
+            if ($httpCode !== 200) {
+                echo getColorLog("APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
+                return [];
+            }
+
+            // 取得したタスクをデコード
+            $tasks = json_decode($response, true);
         }
-
-        curl_close($ch);
-
-        // 取得したタスクをデコード
-        $tasks = json_decode($response, true);
 
         // 今日のタスクのみを取得
         $todayTasks = []; // タスク一覧の初期化

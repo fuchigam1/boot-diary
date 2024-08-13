@@ -1,6 +1,0 @@
-parameters:
-    paths:
-        - ../
-    level: 3
-    bootstrapFiles:
-        - ../lib/common.php

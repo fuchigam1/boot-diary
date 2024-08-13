@@ -1,2 +1,14 @@
+parameters:
+    paths:
+        - .
+    level: 3
+    bootstrapFiles:
+        - ./lib/common.php
+    excludePaths:
+        - ./.github/*
+        - ./.tmp/*
+        - ./.vscode/*
+        - ./template/*
+        - ./build/*
 includes:
-    - .phpstan/extension.neon
+    - ./phpstan-baseline.neon

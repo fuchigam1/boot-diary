@@ -68,9 +68,13 @@ class GenerateFile {
         if (!is_dir(dirname($filePath))) {
             mkdir(dirname($filePath), 0777, true);
         }
-        file_put_contents($filePath, json_encode($projects, JSON_PRETTY_PRINT));
 
-        echo getColorLog("Togglのプロジェクト一覧を取得し .tmp/projects_toggl.json に保存しました" . PHP_EOL, 'info');
+        if ($projects) {
+            file_put_contents($filePath, json_encode($projects, JSON_PRETTY_PRINT));
+            echo getColorLog("Togglのプロジェクト一覧を取得し .tmp/projects_toggl.json に保存しました" . PHP_EOL, 'info');
+        } else {
+            echo getColorLog("Togglのプロジェクト一覧がありませんでした" . PHP_EOL, 'info');
+        }
     }
 
     /**
@@ -84,6 +88,8 @@ class GenerateFile {
             return [];
         }
 
+        $$projects = [];
+
         // ヘッダーを設定
         $headers = [
             'Authorization: Bearer ' . YOUR_TODOIST_API_TOKEN,
@@ -93,29 +99,46 @@ class GenerateFile {
         $ch = curl_init('https://api.todoist.com/rest/v2/projects');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        // タイムアウト設定（適宜調整）
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        // ドット表示プロセスをフォーク（LinuxやmacOSで使えるが、Windowsでは互換性のある方法を使う必要がある）
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die('プロセスの作成に失敗しました');
+        } elseif ($pid == 0) {
+            // 子プロセス: ドットを表示
+            displayDots();
+            exit;
+        } else {
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-        if ($httpCode !== 200) {
-            echo getColorLog(PHP_EOL . "APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
-            return [];
+            // 子プロセスを終了させる
+            posix_kill($pid, SIGTERM);
+
+            // cURLの処理が終わったら改行
+            echo PHP_EOL;
+
+            if ($httpCode !== 200) {
+                echo getColorLog(PHP_EOL . "APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
+                return [];
+            }
+
+            $projects = json_decode($response, true);
         }
-
-        curl_close($ch);
-
-        $projects = json_decode($response, true);
 
         $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_todoist.json';
         if (!is_dir(dirname($filePath))) {
             mkdir(dirname($filePath), 0777, true);
         }
-        file_put_contents($filePath, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        echo getColorLog("Todoistのプロジェクト一覧を取得し .tmp/projects_todoist.json に保存しました" . PHP_EOL, 'info');
+        if ($projects) {
+            file_put_contents($filePath, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo getColorLog("Todoistのプロジェクト一覧を取得し .tmp/projects_todoist.json に保存しました" . PHP_EOL, 'info');
+        } else {
+            echo getColorLog("Todoistのプロジェクト一覧がありませんでした" . PHP_EOL, 'info');
+        }
     }
 
 }

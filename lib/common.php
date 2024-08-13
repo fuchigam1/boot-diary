@@ -109,3 +109,16 @@ function getVersion(): string {
 
     return $versionNo;
 }
+
+/**
+ * 別プロセスでドットを表示する関数
+ *
+ * @return void
+ */
+function displayDots(): void {
+    echo getColorLog("[Now Loading] ", 'notice');
+    while (true) {
+        echo getColorLog(".", 'notice');
+        sleep(1); // 1秒ごとにドットを表示
+    }
+}

@@ -1,8 +1,0 @@
-parameters:
-    paths:
-        - ../
-    level: 3
-    bootstrapFiles:
-        - ../lib/common.php
-includes:
-    - ../phpstan-baseline.neon

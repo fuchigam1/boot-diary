@@ -12,8 +12,8 @@ _notes
 ## This Project
 .tmp/*
 !.tmp/empty
-template/*
-!template/empty
+templates/*
+!templates/empty
 .phpdoc/*
 build/*
 

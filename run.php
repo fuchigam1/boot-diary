@@ -86,7 +86,7 @@ class Run {
             'new.template.md',
         ];
         foreach ($templateFiles as $templateFile) {
-            $templatePath = 'template' . DS . $templateFile;
+            $templatePath = TEMPLATE_DIR . DS . $templateFile;
             if (!file_exists($templatePath)) {
                 echo getColorLog('php run.php init を実行してください' . PHP_EOL, 'error');
                 exit;

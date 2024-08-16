@@ -11,11 +11,11 @@ class Init
 
     public function __construct()
     {
-        $this->templateDir = __DIR__ . '/../template';
-        $this->newTemplatePath = $this->templateDir . '/new.template.md';
-        $this->formatHeaderTemplatePath = $this->templateDir . '/format-header.template.md';
-        $this->formatTemplatePath = $this->templateDir . '/format.template.md';
-        $this->formatFooterTemplatePath = $this->templateDir . '/format-footer.template.md';
+        $this->templateDir = TEMPLATE_DIR;
+        $this->newTemplatePath = $this->templateDir . DS .'new.template.md';
+        $this->formatHeaderTemplatePath = $this->templateDir . DS . 'format-header.template.md';
+        $this->formatTemplatePath = $this->templateDir . DS . 'format.template.md';
+        $this->formatFooterTemplatePath = $this->templateDir . DS . 'format-footer.template.md';
     }
 
     public function execute()

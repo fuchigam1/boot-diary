@@ -12,7 +12,7 @@ class DailyReportCreator
     public function __construct()
     {
         $this->dateFormat = 'Ymd';
-        $this->templatePath = __DIR__ . '/../template/new.template.md';
+        $this->templatePath = TEMPLATE_DIR . DS . 'new.template.md';
         $this->Store = new Store();
     }
 

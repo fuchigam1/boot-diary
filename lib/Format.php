@@ -1,6 +1,11 @@
 <?php
 require_once 'common.php';
-
+require_once 'Store.php';
+/**
+ * 日報ファイルを指定した日付に移動し、README.md を更新する
+ *
+ * @property Store $Store
+ */
 class Format
 {
     private $fileExtension;
@@ -13,11 +18,12 @@ class Format
     public function __construct()
     {
         $this->fileExtension = '.md';
-        $this->readmePath = __DIR__ . '/../README.md';
-        $this->headerTemplatePath = __DIR__ . '/../template/format-header.template.md';
-        $this->mainTemplatePath = __DIR__ . '/../template/format.template.md';
-        $this->footerTemplatePath = __DIR__ . '/../template/format-footer.template.md';
+        $this->readmePath = APP_ROOT . DS . 'README.md';
+        $this->headerTemplatePath = TEMPLATE_DIR . DS . 'format-header.template.md';
+        $this->mainTemplatePath = TEMPLATE_DIR . DS . 'format.template.md';
+        $this->footerTemplatePath = TEMPLATE_DIR . DS . 'format-footer.template.md';
         $this->today = date('Ymd'); // 今日の日付を取得
+        $this->Store = new Store();
     }
 
     public function execute($argv)
@@ -86,14 +92,14 @@ class Format
 
     private function updateReadme()
     {
-        $headerTemplate = file_get_contents($this->headerTemplatePath);
-        $mainTemplate = file_get_contents($this->mainTemplatePath);
-        $footerTemplate = file_get_contents($this->footerTemplatePath);
+        $headerTemplate = $this->Store->readTemplate(basename($this->headerTemplatePath));
+        $mainTemplate = $this->Store->readTemplate(basename($this->mainTemplatePath));
+        $footerTemplate = $this->Store->readTemplate(basename($this->footerTemplatePath));
 
         $readmeContent = $headerTemplate . "\n";
 
         // 年ディレクトリを取得
-        $years = glob(__DIR__ . '/../[0-9]*', GLOB_ONLYDIR);
+        $years = glob($this->Store->reportsDir . DS . '[0-9]*', GLOB_ONLYDIR);
 
         // 作成日時でソート（新しい順）
         usort($years, function($a, $b) {
@@ -151,4 +157,29 @@ class Format
 
         file_put_contents($this->readmePath, $readmeContent);
     }
+
+    /**
+     * 絶対パスをREADME.mdからの相対パスに変換する
+     *
+     * @param string $absolutePath 変換したい絶対パス
+     * @param string $basePath 基準となる絶対パス (README.md が存在するディレクトリ)
+     * @return string
+     */
+    private function convertToRelativePath(string $absolutePath, string $basePath): string {
+        // $absolutePath と $basePath を標準化
+        $absolutePath = realpath($absolutePath);
+        $basePath = realpath($basePath);
+
+        // 絶対パスが basePath で始まる場合、その部分を削除して相対パスにする
+        if (strpos($absolutePath, $basePath) === 0) {
+            $relativePath = substr($absolutePath, strlen($basePath) + 1); // +1 for the trailing slash
+        } else {
+            // basePath の外部にある場合は絶対パスを返す (異なるボリューム/ディレクトリツリー間のリンクは相対化できない)
+            return $absolutePath;
+        }
+
+        // ./を先頭に付加して相対パスにする
+        return '.' . DS . $relativePath;
+    }
+
 }

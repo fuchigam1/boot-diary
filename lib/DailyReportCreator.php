@@ -16,7 +16,7 @@ class DailyReportCreator
         $this->Store = new Store();
     }
 
-    public function execute($argv)
+    public function execute($argv): void
     {
         // コマンドライン引数から日付を取得
         $inputDate = $argv[2] ?? null;

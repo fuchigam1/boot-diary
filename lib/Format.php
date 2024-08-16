@@ -8,12 +8,13 @@ require_once 'Store.php';
  */
 class Format
 {
-    private $fileExtension;
-    private $readmePath;
-    private $headerTemplatePath;
-    private $mainTemplatePath;
-    private $footerTemplatePath;
-    private $today;
+    private string $fileExtension;
+    private string $readmePath;
+    private string $headerTemplatePath;
+    private string $mainTemplatePath;
+    private string $footerTemplatePath;
+    private string $today;
+    private object $Store;
 
     public function __construct()
     {
@@ -26,7 +27,7 @@ class Format
         $this->Store = new Store();
     }
 
-    public function execute($argv)
+    public function execute(array $argv): void
     {
         // コマンドライン引数から日付を取得
         $specifiedDate = $argv[2] ?? null;
@@ -77,20 +78,29 @@ class Format
         echo getColorLog($destinationPath. PHP_EOL, 'info');
     }
 
-    private function confirmOverwrite($filePath)
+    /**
+     * 既に日報ファイルが存在する場合、上書きするか確認する
+     *
+     * @param string $filePath
+     * @return void
+     */
+    private function confirmOverwrite(string $filePath): void
     {
         $fileName = basename($filePath);
         echo getColorLog("$fileName はすでに存在します。上書きしますか？ (y/n): ", 'warning');
-        $handle = fopen("php://stdin", "r");
-        $input = trim(fgets($handle));
-
-        if (strtolower($input) !== 'y') {
+        $response = in(['y', 'n']);
+        if ($response !== 'y') {
             echo getColorLog("ファイルの上書きをキャンセルしました". PHP_EOL, 'info');
             exit;
         }
     }
 
-    private function updateReadme()
+    /**
+     * README.md を更新する
+     *
+     * @return void
+     */
+    private function updateReadme(): void
     {
         $headerTemplate = $this->Store->readTemplate(basename($this->headerTemplatePath));
         $mainTemplate = $this->Store->readTemplate(basename($this->mainTemplatePath));
@@ -111,7 +121,7 @@ class Format
             $yearContent = str_replace('{{year}}', $year, $mainTemplate);
 
             // 月ディレクトリを取得
-            $months = glob($yearPath . '/*', GLOB_ONLYDIR);
+            $months = glob($yearPath . DS . '*', GLOB_ONLYDIR);
 
             // 作成日時でソート（新しい順）
             usort($months, function($a, $b) {
@@ -154,7 +164,6 @@ class Format
 
         // 不要な空行を削除
         $readmeContent = preg_replace('/\n{3,}/', "\n\n", $readmeContent);
-
         file_put_contents($this->readmePath, $readmeContent);
     }
 

@@ -8,6 +8,8 @@ nbproject
 _notes
 .svn
 .vscode/*
+
+## This Project
 .tmp/*
 !.tmp/empty
 template/*

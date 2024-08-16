@@ -216,7 +216,7 @@ class Toggl {
      */
     private function formatDuration(int $seconds): int {
         $minutes = $seconds / 60;
-        return floor($minutes);
+        return (int) floor($minutes);
     }
 
 }

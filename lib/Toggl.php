@@ -32,7 +32,7 @@ class Toggl {
         $this->projects = $this->getProjects();
     }
 
-    public function execute($argv) {
+    public function execute($argv): void {
         if (!$this->apiToken || !$this->workspaceId) {
             return;
         }
@@ -59,7 +59,7 @@ class Toggl {
         // 日付のタイムエントリーを取得
         $timeEntries = $this->getTimeEntries($date);
         if (!$timeEntries) {
-            echo getColorLog("Togglのタイムエントリーが取得できませんでした" . PHP_EOL, 'error');
+            echo getColorLog("Togglのタイムエントリーがありませんでした" . PHP_EOL, 'error');
             return;
         }
 
@@ -193,11 +193,11 @@ class Toggl {
     }
 
     /**
-     * プロジェクト一覧を取得する
+     * プロジェクト一覧を json ファイルから取得する
      *
      * @return array
      */
-    private function getProjects() {
+    private function getProjects(): array {
         $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_toggl.json';
         if (!file_exists($filePath)) {
             echo getColorLog("Togglプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');
@@ -208,7 +208,13 @@ class Toggl {
         return $projects;
     }
 
-    private function formatDuration($seconds) {
+    /**
+     * 秒数を分に変換する
+     *
+     * @param int $seconds
+     * @return int
+     */
+    private function formatDuration(int $seconds): int {
         $minutes = $seconds / 60;
         return floor($minutes);
     }

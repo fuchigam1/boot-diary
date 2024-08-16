@@ -1,10 +1,16 @@
 <?php
-
+require_once 'Store.php';
+/**
+ * Toggl APIを使用してタイムエントリーを取得し、日報ファイルに追記する
+ *
+ * @property Store $Store
+ */
 class Toggl {
-    private $apiToken;
-    private $workspaceId;
-    private $projects;
-    private $dateFormat;
+    private string $apiToken;
+    private string $workspaceId;
+    private array $projects;
+    private string $dateFormat;
+    private object $Store;
 
     public function __construct() {
         if (defined('YOUR_TOGGL_API_TOKEN') && !empty(YOUR_TOGGL_API_TOKEN)) {
@@ -21,6 +27,7 @@ class Toggl {
             return;
         }
 
+        $this->Store = new Store();
         $this->dateFormat = 'Ymd';
         $this->projects = $this->getProjects();
     }
@@ -43,11 +50,9 @@ class Toggl {
             $date = date($this->dateFormat);
         }
 
-        $filePath = APP_ROOT . DS . $date . '.md';
-        // ファイルに追記
-        if (file_exists($filePath)) {
-            $content = file_get_contents($filePath);
-        } else {
+        $content = $this->Store->readReport($date . '.md');
+
+        if (!$content) {
             $content = "## 内容\n";
         }
 
@@ -119,7 +124,9 @@ class Toggl {
         }
 
         $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);
-        file_put_contents($filePath, $content);
+
+        // Storeクラスを使用してファイルに書き込み
+        $this->Store->saveReport($date . '.md', $content);
 
         echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'notice');
     }

@@ -35,4 +35,18 @@ class Store {
         return file_exists($filePath);
     }
 
+    /**
+     * 指定したファイル名のファイルの内容を読み込む
+     *
+     * @param string $fileName
+     * @return string
+     */
+    public function readReport(string $fileName): string {
+        $filePath = $this->reportsDir . DS . $fileName;
+        if ($this->fileExists($fileName)) {
+            return file_get_contents($filePath);
+        }
+        return '';
+    }
+
 }

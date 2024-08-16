@@ -20,7 +20,7 @@ class Todoist {
      *
      * @return array
      */
-    public function getTodoistTasks() {
+    public function getTodoistTasks(): array {
         if (!$this->apiToken) {
             return [];
         }
@@ -130,7 +130,7 @@ class Todoist {
      *
      * @return array
      */
-    private function getProjects() {
+    private function getProjects(): array {
         $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_todoist.json';
         if (!file_exists($filePath)) {
             echo getColorLog("Todoistプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');

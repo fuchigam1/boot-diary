@@ -3,11 +3,11 @@ require_once 'lib/common.php';
 
 class Init
 {
-    private $templateDir;
-    private $newTemplatePath;
-    private $formatHeaderTemplatePath;
-    private $formatTemplatePath;
-    private $formatFooterTemplatePath;
+    private string $templateDir;
+    private string $newTemplatePath;
+    private string $formatHeaderTemplatePath;
+    private string $formatTemplatePath;
+    private string $formatFooterTemplatePath;
 
     public function __construct()
     {
@@ -18,7 +18,7 @@ class Init
         $this->formatFooterTemplatePath = $this->templateDir . DS . 'format-footer.template.md';
     }
 
-    public function execute()
+    public function execute(): void
     {
         $newTemplateContent = <<<EOT
 # {{date}} {{day_of_week}}
@@ -85,4 +85,5 @@ EOT;
             echo getColorLog($settingOrgPath ." が見つかりません". PHP_EOL, 'error');
         }
     }
+
 }

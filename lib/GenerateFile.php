@@ -88,7 +88,7 @@ class GenerateFile {
             return;
         }
 
-        $$projects = [];
+        $projects = [];
 
         // ヘッダーを設定
         $headers = [

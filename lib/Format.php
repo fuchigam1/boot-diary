@@ -46,32 +46,31 @@ class Format
         }
 
         // ファイルパスの構築
-        $baseDir = __DIR__ . '/../';
-        $filePath = $baseDir . $dateToProcess . $this->fileExtension;
+        $fileName = $dateToProcess . $this->fileExtension;
 
-        if (!file_exists($filePath)) {
-            echo getColorLog("$dateToProcess.md は存在しません". PHP_EOL, 'error');
+        if (!$this->Store->fileExists($fileName)) {
+            echo getColorLog("$fileName は存在しません". PHP_EOL, 'error');
             exit;
         }
 
         // フォルダの作成とファイルの移動
-        $yearDir = $baseDir . substr($dateToProcess, 0, 4);
-        $monthDir = $yearDir . '/' . substr($dateToProcess, 4, 2);
+        $yearDir = substr($dateToProcess, 0, 4);
+        $monthDir = $yearDir . DS . substr($dateToProcess, 4, 2);
 
-        if (!is_dir($yearDir)) {
-            mkdir($yearDir, 0777, true);
+        if (!is_dir($this->Store->reportsDir . DS . $yearDir)) {
+            mkdir($this->Store->reportsDir . DS . $yearDir, 0777, true);
         }
-        if (!is_dir($monthDir)) {
-            mkdir($monthDir, 0777, true);
+        if (!is_dir($this->Store->reportsDir . DS . $monthDir)) {
+            mkdir($this->Store->reportsDir . DS . $monthDir, 0777, true);
         }
 
-        $destinationPath = $monthDir . '/' . $dateToProcess . $this->fileExtension;
+        $destinationPath = $monthDir . DS . $fileName;
 
-        if (file_exists($destinationPath)) {
+        if ($this->Store->fileExists($destinationPath)) {
             $this->confirmOverwrite($destinationPath);
         }
 
-        rename($filePath, $destinationPath);
+        rename($this->Store->reportsDir . DS . $fileName, $this->Store->reportsDir . DS . $destinationPath);
         $this->updateReadme();
 
         echo getColorLog("ファイルを移動し、README.md を更新しました". PHP_EOL, 'info');
@@ -141,7 +140,9 @@ class Format
                         $fileDate = substr($fileName, 0, 8);
                         $dayOfWeek = getDayOfWeek(date('w', strtotime($fileDate)));
 
-                        $fileLinks .= "- [$fileName $dayOfWeek](./$year/$month/$fileName)\n";
+                        $absoluteFilePath = realpath(REPORT_DIR . "/$year/$month/$fileName");
+                        $relativeFilePath = $this->convertToRelativePath($absoluteFilePath, APP_ROOT);
+                        $fileLinks .= "- [$fileName $dayOfWeek]({$relativeFilePath})\n";
                     }
                     $monthSection = "### $month\n\n" . $fileLinks . "\n";
                     $monthContent .= $monthSection;

@@ -138,7 +138,10 @@ class Toggl {
      * @return array
      * @link https://engineering.toggl.com/docs/reports/summary_reports#post-search-time-entries
      */
-    public function getTimeEntries($date) {
+    public function getTimeEntries(string $date): array {
+        // メッセージを表示
+        echo getColorLog("Togglから記録を取得しています。この処理には少し時間がかかるのでお待ちください" . PHP_EOL, 'notice');
+
         $startDate = date('Y-m-d', strtotime($date));
         $endDate = date('Y-m-d', strtotime($date . ' +1 day'));
 
@@ -160,12 +163,32 @@ class Toggl {
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 
-        $response = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
-        }
-        curl_close($ch);
+        // ドット表示プロセスをフォーク（LinuxやmacOSで使えるが、Windowsでは互換性のある方法を使う必要がある）
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die('プロセスの作成に失敗しました');
+        } elseif ($pid == 0) {
+            // 子プロセス: ドットを表示
+            displayDots();
+            exit;
+        } else {
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            if (curl_errno($ch)) {
+                echo getColorLog('Error:' . curl_error($ch), 'error');
+            }
+            curl_close($ch);
 
+            // 子プロセスを終了させる
+            posix_kill($pid, SIGTERM);
+
+            // cURLの処理が終わったら改行
+            echo PHP_EOL;
+
+            if ($httpCode !== 200) {
+                echo getColorLog("APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
+            }
+        }
         return json_decode($response, true);
     }
 

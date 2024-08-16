@@ -8,10 +8,12 @@ nbproject
 _notes
 .svn
 .vscode/*
+
+## This Project
 .tmp/*
 !.tmp/empty
-template/*
-!template/empty
+templates/*
+!templates/empty
 .phpdoc/*
 build/*
 

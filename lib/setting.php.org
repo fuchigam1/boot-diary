@@ -1,4 +1,14 @@
 <?php
+// 日報ファイルの保存先ディレクトリ
+if (!defined('REPORT_DIR')) {
+    define('REPORT_DIR', APP_ROOT . DS . 'reports');
+}
+
+// 日報ファイル用のテンプレート保存先ディレクトリ
+if (!defined('TEMPLATE_DIR')) {
+    define('TEMPLATE_DIR', APP_ROOT . DS . 'templates');
+}
+
 // TodoistのAPIトークンを設定
 if (!defined('YOUR_TODOIST_API_TOKEN')) {
     define('YOUR_TODOIST_API_TOKEN', '');

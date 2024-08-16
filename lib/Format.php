@@ -1,26 +1,33 @@
 <?php
 require_once 'common.php';
-
+require_once 'Store.php';
+/**
+ * 日報ファイルを指定した日付に移動し、README.md を更新する
+ *
+ * @property Store $Store
+ */
 class Format
 {
-    private $fileExtension;
-    private $readmePath;
-    private $headerTemplatePath;
-    private $mainTemplatePath;
-    private $footerTemplatePath;
-    private $today;
+    private string $fileExtension;
+    private string $readmePath;
+    private string $headerTemplatePath;
+    private string $mainTemplatePath;
+    private string $footerTemplatePath;
+    private string $today;
+    private object $Store;
 
     public function __construct()
     {
         $this->fileExtension = '.md';
-        $this->readmePath = __DIR__ . '/../README.md';
-        $this->headerTemplatePath = __DIR__ . '/../template/format-header.template.md';
-        $this->mainTemplatePath = __DIR__ . '/../template/format.template.md';
-        $this->footerTemplatePath = __DIR__ . '/../template/format-footer.template.md';
+        $this->readmePath = APP_ROOT . DS . 'README.md';
+        $this->headerTemplatePath = TEMPLATE_DIR . DS . 'format-header.template.md';
+        $this->mainTemplatePath = TEMPLATE_DIR . DS . 'format.template.md';
+        $this->footerTemplatePath = TEMPLATE_DIR . DS . 'format-footer.template.md';
         $this->today = date('Ymd'); // 今日の日付を取得
+        $this->Store = new Store();
     }
 
-    public function execute($argv)
+    public function execute(array $argv): void
     {
         // コマンドライン引数から日付を取得
         $specifiedDate = $argv[2] ?? null;
@@ -39,61 +46,69 @@ class Format
         }
 
         // ファイルパスの構築
-        $baseDir = __DIR__ . '/../';
-        $filePath = $baseDir . $dateToProcess . $this->fileExtension;
+        $fileName = $dateToProcess . $this->fileExtension;
 
-        if (!file_exists($filePath)) {
-            echo getColorLog("$dateToProcess.md は存在しません". PHP_EOL, 'error');
+        if (!$this->Store->fileExists($fileName)) {
+            echo getColorLog("$fileName は存在しません". PHP_EOL, 'error');
             exit;
         }
 
         // フォルダの作成とファイルの移動
-        $yearDir = $baseDir . substr($dateToProcess, 0, 4);
-        $monthDir = $yearDir . '/' . substr($dateToProcess, 4, 2);
+        $yearDir = substr($dateToProcess, 0, 4);
+        $monthDir = $yearDir . DS . substr($dateToProcess, 4, 2);
 
-        if (!is_dir($yearDir)) {
-            mkdir($yearDir, 0777, true);
+        if (!is_dir($this->Store->reportsDir . DS . $yearDir)) {
+            mkdir($this->Store->reportsDir . DS . $yearDir, 0777, true);
         }
-        if (!is_dir($monthDir)) {
-            mkdir($monthDir, 0777, true);
+        if (!is_dir($this->Store->reportsDir . DS . $monthDir)) {
+            mkdir($this->Store->reportsDir . DS . $monthDir, 0777, true);
         }
 
-        $destinationPath = $monthDir . '/' . $dateToProcess . $this->fileExtension;
+        $destinationPath = $monthDir . DS . $fileName;
 
-        if (file_exists($destinationPath)) {
+        if ($this->Store->fileExists($destinationPath)) {
             $this->confirmOverwrite($destinationPath);
         }
 
-        rename($filePath, $destinationPath);
+        rename($this->Store->reportsDir . DS . $fileName, $this->Store->reportsDir . DS . $destinationPath);
         $this->updateReadme();
 
         echo getColorLog("ファイルを移動し、README.md を更新しました". PHP_EOL, 'info');
         echo getColorLog($destinationPath. PHP_EOL, 'info');
     }
 
-    private function confirmOverwrite($filePath)
+    /**
+     * 既に日報ファイルが存在する場合、上書きするか確認する
+     *
+     * @param string $filePath
+     * @return void
+     */
+    private function confirmOverwrite(string $filePath): void
     {
         $fileName = basename($filePath);
         echo getColorLog("$fileName はすでに存在します。上書きしますか？ (y/n): ", 'warning');
-        $handle = fopen("php://stdin", "r");
-        $input = trim(fgets($handle));
-
-        if (strtolower($input) !== 'y') {
+        $response = in(['y', 'n']);
+        if ($response !== 'y') {
             echo getColorLog("ファイルの上書きをキャンセルしました". PHP_EOL, 'info');
             exit;
         }
     }
 
-    private function updateReadme()
+    /**
+     * README.md を更新する
+     *
+     * @return void
+     */
+    private function updateReadme(): void
     {
-        $headerTemplate = file_get_contents($this->headerTemplatePath);
-        $mainTemplate = file_get_contents($this->mainTemplatePath);
-        $footerTemplate = file_get_contents($this->footerTemplatePath);
+        $headerTemplate = $this->Store->readTemplate(basename($this->headerTemplatePath));
+        $mainTemplate = $this->Store->readTemplate(basename($this->mainTemplatePath));
+        $footerTemplate = $this->Store->readTemplate(basename($this->footerTemplatePath));
 
         $readmeContent = $headerTemplate . "\n";
 
         // 年ディレクトリを取得
-        $years = glob(__DIR__ . '/../[0-9]*', GLOB_ONLYDIR);
+        $years = glob($this->Store->reportsDir . DS . '[0-9]*', GLOB_ONLYDIR);
 
         // 作成日時でソート（新しい順）
         usort($years, function($a, $b) {
@@ -105,7 +120,7 @@ class Format
             $yearContent = str_replace('{{year}}', $year, $mainTemplate);
 
             // 月ディレクトリを取得
-            $months = glob($yearPath . '/*', GLOB_ONLYDIR);
+            $months = glob($yearPath . DS . '*', GLOB_ONLYDIR);
 
             // 作成日時でソート（新しい順）
             usort($months, function($a, $b) {
@@ -125,7 +140,9 @@ class Format
                         $fileDate = substr($fileName, 0, 8);
                         $dayOfWeek = getDayOfWeek(date('w', strtotime($fileDate)));
 
-                        $fileLinks .= "- [$fileName $dayOfWeek](./$year/$month/$fileName)\n";
+                        $absoluteFilePath = realpath(REPORT_DIR . "/$year/$month/$fileName");
+                        $relativeFilePath = $this->convertToRelativePath($absoluteFilePath, APP_ROOT);
+                        $fileLinks .= "- [$fileName $dayOfWeek]({$relativeFilePath})\n";
                     }
                     $monthSection = "### $month\n\n" . $fileLinks . "\n";
                     $monthContent .= $monthSection;
@@ -148,7 +165,31 @@ class Format
 
         // 不要な空行を削除
         $readmeContent = preg_replace('/\n{3,}/', "\n\n", $readmeContent);
-
         file_put_contents($this->readmePath, $readmeContent);
     }
+
+    /**
+     * 絶対パスをREADME.mdからの相対パスに変換する
+     *
+     * @param string $absolutePath 変換したい絶対パス
+     * @param string $basePath 基準となる絶対パス (README.md が存在するディレクトリ)
+     * @return string
+     */
+    private function convertToRelativePath(string $absolutePath, string $basePath): string {
+        // $absolutePath と $basePath を標準化
+        $absolutePath = realpath($absolutePath);
+        $basePath = realpath($basePath);
+
+        // 絶対パスが basePath で始まる場合、その部分を削除して相対パスにする
+        if (strpos($absolutePath, $basePath) === 0) {
+            $relativePath = substr($absolutePath, strlen($basePath) + 1); // +1 for the trailing slash
+        } else {
+            // basePath の外部にある場合は絶対パスを返す (異なるボリューム/ディレクトリツリー間のリンクは相対化できない)
+            return $absolutePath;
+        }
+
+        // ./を先頭に付加して相対パスにする
+        return '.' . DS . $relativePath;
+    }
+
 }

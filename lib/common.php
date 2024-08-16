@@ -122,3 +122,30 @@ function displayDots(): void {
         sleep(1); // 1秒ごとにドットを表示
     }
 }
+
+/**
+ * 標準入力を受け取る
+ * 配列で指定された物以外が入力されると再度入力を求める
+ *
+ * @param array $allowStringAry
+ * @return string
+ */
+function in(array $allowStringAry = null): string {
+    if ($allowStringAry) {
+        $times = 0;
+        while (1) {
+            $times++;
+            if ($times > 1) {
+                echo getColorLog("入力された文字が間違っています(" . implode(" | ", $allowStringAry) . "): ", 'alert');
+            }
+
+            $input = trim(fgets(STDIN));
+            if (in_array($input, $allowStringAry)) {
+                return $input;
+            }
+        }
+
+    } else {
+        return trim(fgets(STDIN));
+    }
+}

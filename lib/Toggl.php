@@ -1,10 +1,16 @@
 <?php
-
+require_once 'Store.php';
+/**
+ * Toggl APIを使用してタイムエントリーを取得し、日報ファイルに追記する
+ *
+ * @property Store $Store
+ */
 class Toggl {
-    private $apiToken;
-    private $workspaceId;
-    private $projects;
-    private $dateFormat;
+    private string $apiToken;
+    private string $workspaceId;
+    private array $projects;
+    private string $dateFormat;
+    private object $Store;
 
     public function __construct() {
         if (defined('YOUR_TOGGL_API_TOKEN') && !empty(YOUR_TOGGL_API_TOKEN)) {
@@ -21,11 +27,12 @@ class Toggl {
             return;
         }
 
+        $this->Store = new Store();
         $this->dateFormat = 'Ymd';
         $this->projects = $this->getProjects();
     }
 
-    public function execute($argv) {
+    public function execute($argv): void {
         if (!$this->apiToken || !$this->workspaceId) {
             return;
         }
@@ -43,18 +50,16 @@ class Toggl {
             $date = date($this->dateFormat);
         }
 
-        $filePath = APP_ROOT . DS . $date . '.md';
-        // ファイルに追記
-        if (file_exists($filePath)) {
-            $content = file_get_contents($filePath);
-        } else {
+        $content = $this->Store->readReport($date . '.md');
+
+        if (!$content) {
             $content = "## 内容\n";
         }
 
         // 日付のタイムエントリーを取得
         $timeEntries = $this->getTimeEntries($date);
         if (!$timeEntries) {
-            echo getColorLog("Togglのタイムエントリーが取得できませんでした" . PHP_EOL, 'error');
+            echo getColorLog("Togglのタイムエントリーがありませんでした" . PHP_EOL, 'error');
             return;
         }
 
@@ -119,7 +124,9 @@ class Toggl {
         }
 
         $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);
-        file_put_contents($filePath, $content);
+
+        // Storeクラスを使用してファイルに書き込み
+        $this->Store->saveReport($date . '.md', $content);
 
         echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'notice');
     }
@@ -131,7 +138,10 @@ class Toggl {
      * @return array
      * @link https://engineering.toggl.com/docs/reports/summary_reports#post-search-time-entries
      */
-    public function getTimeEntries($date) {
+    public function getTimeEntries(string $date): array {
+        // メッセージを表示
+        echo getColorLog("Togglから記録を取得しています。この処理には少し時間がかかるのでお待ちください" . PHP_EOL, 'notice');
+
         $startDate = date('Y-m-d', strtotime($date));
         $endDate = date('Y-m-d', strtotime($date . ' +1 day'));
 
@@ -153,21 +163,41 @@ class Toggl {
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 
-        $response = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
-        }
-        curl_close($ch);
+        // ドット表示プロセスをフォーク（LinuxやmacOSで使えるが、Windowsでは互換性のある方法を使う必要がある）
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die('プロセスの作成に失敗しました');
+        } elseif ($pid == 0) {
+            // 子プロセス: ドットを表示
+            displayDots();
+            exit;
+        } else {
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            if (curl_errno($ch)) {
+                echo getColorLog('Error:' . curl_error($ch), 'error');
+            }
+            curl_close($ch);
 
+            // 子プロセスを終了させる
+            posix_kill($pid, SIGTERM);
+
+            // cURLの処理が終わったら改行
+            echo PHP_EOL;
+
+            if ($httpCode !== 200) {
+                echo getColorLog("APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
+            }
+        }
         return json_decode($response, true);
     }
 
     /**
-     * プロジェクト一覧を取得する
+     * プロジェクト一覧を json ファイルから取得する
      *
      * @return array
      */
-    private function getProjects() {
+    private function getProjects(): array {
         $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_toggl.json';
         if (!file_exists($filePath)) {
             echo getColorLog("Togglプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');
@@ -178,9 +208,15 @@ class Toggl {
         return $projects;
     }
 
-    private function formatDuration($seconds) {
+    /**
+     * 秒数を分に変換する
+     *
+     * @param int $seconds
+     * @return int
+     */
+    private function formatDuration(int $seconds): int {
         $minutes = $seconds / 60;
-        return floor($minutes);
+        return (int) floor($minutes);
     }
 
 }

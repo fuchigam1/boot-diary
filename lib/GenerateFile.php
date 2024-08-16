@@ -1,9 +1,9 @@
 <?php
 
 class GenerateFile {
-    private $workspaceId;
-    private $email;
-    private $password;
+    private string $workspaceId;
+    private string $email;
+    private string $password;
 
     public function __construct() {
         if (defined('YOUR_TOGGL_WORKSPACE_ID') && !empty(YOUR_TOGGL_WORKSPACE_ID)) {
@@ -28,7 +28,7 @@ class GenerateFile {
         }
     }
 
-    public function execute() {
+    public function execute(): void {
         $this->getProjectsFromTodoist();
         $this->getProjectsFromToggl();
     }
@@ -38,7 +38,7 @@ class GenerateFile {
      *
      * @link https://engineering.toggl.com/docs/api/projects#get-workspaceprojects
      */
-    public function getProjectsFromToggl() {
+    public function getProjectsFromToggl(): void {
         $url = "https://api.track.toggl.com/api/v9/workspaces/$this->workspaceId/projects";
         $projects = [];
         $page = 1;
@@ -82,10 +82,10 @@ class GenerateFile {
      *
      * @link https://developer.todoist.com/rest/v2/#get-all-projects
      */
-    public function getProjectsFromTodoist() {
+    public function getProjectsFromTodoist(): void {
         if (!defined('YOUR_TODOIST_API_TOKEN') || empty(YOUR_TODOIST_API_TOKEN)) {
             echo getColorLog("Todoist APIトークンが設定されていません" . PHP_EOL, 'error');
-            return [];
+            return;
         }
 
         $$projects = [];
@@ -122,7 +122,7 @@ class GenerateFile {
 
             if ($httpCode !== 200) {
                 echo getColorLog(PHP_EOL . "APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
-                return [];
+                return;
             }
 
             $projects = json_decode($response, true);

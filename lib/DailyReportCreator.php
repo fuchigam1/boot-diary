@@ -1,19 +1,22 @@
 <?php
 require_once 'common.php';
 require_once 'Todoist.php';
+require_once 'Store.php';
 
 class DailyReportCreator
 {
-    private $dateFormat;
-    private $templatePath;
+    private string $dateFormat;
+    private string $templatePath;
+    private object $Store;
 
     public function __construct()
     {
         $this->dateFormat = 'Ymd';
-        $this->templatePath = __DIR__ . '/../template/new.template.md';
+        $this->templatePath = TEMPLATE_DIR . DS . 'new.template.md';
+        $this->Store = new Store();
     }
 
-    public function execute($argv)
+    public function execute($argv): void
     {
         // コマンドライン引数から日付を取得
         $inputDate = $argv[2] ?? null;
@@ -30,15 +33,12 @@ class DailyReportCreator
         }
 
         $fileName = "$date.md";
-        $filePath = __DIR__ . '/../' . $fileName;
 
-        if (file_exists($filePath)) {
+        if ($this->Store->fileExists($fileName)) {
             echo getColorLog("ファイル '$fileName' は既に存在します。上書きしますか？ (y/n): ", 'warning');
-            $handle = fopen("php://stdin", "r");
-            $response = trim(fgets($handle));
-
-            if (strtolower($response) !== 'y') {
-                echo getColorLog("ファイルの上書きをキャンセルしました". PHP_EOL, 'info');
+            $response = in(['y', 'n']);
+            if ($response !== 'y') {
+                echo getColorLog("ファイルの上書きをキャンセルしました" . PHP_EOL, 'info');
                 return;
             }
         }
@@ -54,19 +54,22 @@ class DailyReportCreator
         if (!empty($tasks)) {
             $todoistSection = "## 予定\n\n";
             foreach ($tasks as $task) {
-                $projectName = $task['project_name'] ?? '未分類';
+                $projectName = '未分類';
+                if (isset($task['project_name'])) {
+                    $projectName = $task['project_name'];
+                }
                 $taskName = $task['content'];
-                $todoistSection .= "- $projectName $taskName". PHP_EOL;
+                $todoistSection .= "- $projectName $taskName" . PHP_EOL;
             }
             $templateContent = str_replace('{{todoist_tasks}}', $todoistSection, $templateContent);
         } else {
-            $templateContent = str_replace(PHP_EOL .'{{todoist_tasks}}'. PHP_EOL, "", $templateContent);
+            $templateContent = str_replace(PHP_EOL . '{{todoist_tasks}}' . PHP_EOL, "", $templateContent);
         }
 
-        file_put_contents($filePath, $templateContent);
+        $this->Store->saveReport($fileName, $templateContent);  // Storeクラスを使用して保存
 
-        echo getColorLog("日報ファイル '$fileName' を作成しました". PHP_EOL, 'info');
-        echo getColorLog(APP_ROOT . DS . $fileName . PHP_EOL, 'info');
+        echo getColorLog("日報ファイル '$fileName' を作成しました" . PHP_EOL, 'info');
+        echo getColorLog(REPORT_DIR . DS . $fileName . PHP_EOL, 'info');
     }
 
 }

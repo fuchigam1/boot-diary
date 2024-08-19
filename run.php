@@ -28,7 +28,7 @@ class Run {
         $this->argv = $argv;
     }
 
-    public function exec() {
+    public function exec(): void {
         $this->init($this->argv);
 
         $command = $this->argv[1] ?? '';
@@ -69,12 +69,32 @@ class Run {
         }
     }
 
-    private function init($argv) {
+    /**
+     * 初期実行処理
+     *
+     * @param array $argv
+     * @return void
+     */
+    private function init(array $argv): void {
         $this->checkEnviroment($argv);
         $this->checkArguments($argv);
     }
 
-    private function checkEnviroment($argv) {
+    /**
+     * 環境チェック
+     *
+     * @param array $argv
+     * @return void
+     */
+    private function checkEnviroment(array $argv): void {
+        // phpversion が 7.4 以上であることを確認する
+        if (version_compare(phpversion(), '7.4', '<')) {
+            // 現在のバージョンを表示する
+            echo getColorLog('現在のPHPバージョン: ' . phpversion() . PHP_EOL, 'warning');
+            echo getColorLog('PHPバージョンが7.4以上に対応しています' . PHP_EOL, 'warning');
+            exit;
+        }
+
         if (isset($argv[1]) && $argv[1] === 'init') {
             return;
         }
@@ -94,7 +114,13 @@ class Run {
         }
     }
 
-    private function checkArguments($argv) {
+    /**
+     * 引数チェック
+     *
+     * @param array $argv
+     * @return void
+     */
+    private function checkArguments(array $argv): void {
         if (isset($argv[1])) {
             if (!in_array($argv[1], $this->allowCommand, true)) {
                 echo getColorLog('実行できません' . PHP_EOL, 'error');
@@ -103,7 +129,12 @@ class Run {
         }
     }
 
-    private function getManual() {
+    /**
+     * マニュアル取得
+     *
+     * @return string
+     */
+    private function getManual(): string {
         $manual = '';
         $manual .= '==================================================' . PHP_EOL;
         $manual .= 'boot-diary は日報の簡単作成を補助するツールです。以下のステップで完結できます。' . PHP_EOL;

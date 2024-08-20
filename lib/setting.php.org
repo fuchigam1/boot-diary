@@ -9,6 +9,17 @@ if (!defined('TEMPLATE_DIR')) {
     define('TEMPLATE_DIR', APP_ROOT . DS . 'templates');
 }
 
+// 日報ファイルの拡張子
+if (!defined('REPORT_FILE_EXTENSION')) {
+	define('REPORT_FILE_EXTENSION', '.md');
+}
+
+// 日報ファイルのインデックスファイルパス。README.md に日報ファイルの一覧を記載する
+if (!defined('REPORT_INDEX_FILE')) {
+	define('REPORT_INDEX_FILE', APP_ROOT . DS . 'README' . REPORT_FILE_EXTENSION);
+	// define('REPORT_INDEX_FILE', REPORT_DIR . DS . 'README' . REPORT_FILE_EXTENSION);
+}
+
 // TodoistのAPIトークンを設定
 if (!defined('YOUR_TODOIST_API_TOKEN')) {
     define('YOUR_TODOIST_API_TOKEN', '');

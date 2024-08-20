@@ -50,7 +50,7 @@ class Toggl {
             $date = date($this->dateFormat);
         }
 
-        $content = $this->Store->readReport($date . '.md');
+        $content = $this->Store->readReport($date . REPORT_FILE_EXTENSION);
 
         if (!$content) {
             $content = "## 内容\n";
@@ -126,7 +126,7 @@ class Toggl {
         $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);
 
         // Storeクラスを使用してファイルに書き込み
-        $this->Store->saveReport($date . '.md', $content);
+        $this->Store->saveReport($date . REPORT_FILE_EXTENSION, $content);
 
         echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'notice');
     }

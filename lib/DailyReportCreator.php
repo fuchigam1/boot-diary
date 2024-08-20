@@ -32,7 +32,7 @@ class DailyReportCreator
             $date = date($this->dateFormat);
         }
 
-        $fileName = "$date.md";
+        $fileName = "$date" . REPORT_FILE_EXTENSION;
 
         if ($this->Store->fileExists($fileName)) {
             echo getColorLog("ファイル '$fileName' は既に存在します。上書きしますか？ (y/n): ", 'warning');

@@ -1,6 +1,8 @@
 <?php
 require_once 'common.php';
-
+/**
+ * 日報ファイルの入出力管理用クラス
+ */
 class Store {
     public string $reportsDir;
     public string $templateDir;

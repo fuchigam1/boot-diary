@@ -1,7 +1,7 @@
 <?php
 require_once 'Store.php';
 /**
- * Toggl APIを使用してタイムエントリーを取得し、日報ファイルに追記する
+ * Toggl APIを使用してタイムエントリーを取得する連携用クラス
  *
  * @property Store $Store
  */

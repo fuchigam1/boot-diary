@@ -1,8 +1,10 @@
 <?php
-
+/**
+ * Todoist APIを利用してタスク一覧を取得する連携用クラス
+ */
 class Todoist {
-    private $apiToken;
-    private $projects;
+    private string $apiToken;
+    private array $projects;
 
     public function __construct() {
         if (defined('YOUR_TODOIST_API_TOKEN') && !empty(YOUR_TODOIST_API_TOKEN)) {

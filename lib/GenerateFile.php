@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * API連携用のファイルを生成するクラス
+ */
 class GenerateFile {
     private string $workspaceId;
     private string $email;

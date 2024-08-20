@@ -8,7 +8,6 @@ require_once 'Store.php';
  */
 class Format
 {
-    private string $fileExtension;
     private string $readmePath;
     private string $headerTemplatePath;
     private string $mainTemplatePath;
@@ -18,8 +17,7 @@ class Format
 
     public function __construct()
     {
-        $this->fileExtension = '.md';
-        $this->readmePath = APP_ROOT . DS . 'README.md';
+        $this->readmePath = REPORT_INDEX_FILE;
         $this->headerTemplatePath = TEMPLATE_DIR . DS . 'format-header.template.md';
         $this->mainTemplatePath = TEMPLATE_DIR . DS . 'format.template.md';
         $this->footerTemplatePath = TEMPLATE_DIR . DS . 'format-footer.template.md';
@@ -46,7 +44,7 @@ class Format
         }
 
         // ファイルパスの構築
-        $fileName = $dateToProcess . $this->fileExtension;
+        $fileName = $dateToProcess . REPORT_FILE_EXTENSION;
 
         if (!$this->Store->fileExists($fileName)) {
             echo getColorLog("$fileName は存在しません". PHP_EOL, 'error');
@@ -73,7 +71,7 @@ class Format
         rename($this->Store->reportsDir . DS . $fileName, $this->Store->reportsDir . DS . $destinationPath);
         $this->updateReadme();
 
-        echo getColorLog("ファイルを移動し、README.md を更新しました". PHP_EOL, 'info');
+        echo getColorLog("ファイルを移動し " . REPORT_INDEX_FILE . "を更新しました". PHP_EOL, 'info');
         echo getColorLog($destinationPath. PHP_EOL, 'info');
     }
 
@@ -130,7 +128,7 @@ class Format
             $monthContent = '';
             foreach ($months as $monthPath) {
                 $month = basename($monthPath);
-                $files = glob($monthPath . '/*.md');
+                $files = glob($monthPath . '/*' . REPORT_FILE_EXTENSION);
                 if (!empty($files)) {
                     $fileLinks = '';
                     foreach ($files as $filePath) {

@@ -95,6 +95,12 @@ class Run {
             exit;
         }
 
+        // setting.php が存在するかを確認する
+        if (!file_exists(APP_ROOT . DS . 'lib' . DS . 'setting.php')) {
+            echo getColorLog('php run.php init を実行してください' . PHP_EOL, 'error');
+            exit;
+        }
+
         if (isset($argv[1]) && $argv[1] === 'init') {
             return;
         }

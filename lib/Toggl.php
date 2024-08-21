@@ -71,7 +71,7 @@ class Toggl {
                 continue;
             }
 
-            $projectName = isset($entry['project_id']) ? $this->projects[$entry['project_id']] : 'Without project';
+            $projectName = isset($entry['project_id']) && isset($this->projects[$entry['project_id']]) ? $this->projects[$entry['project_id']] : 'Without project';
 
             // プロジェクト名が EXCLUDE_PROJECTS_FOR_TOGGL に含まれているか確認
             if (in_array($projectName, EXCLUDE_PROJECTS_FOR_TOGGL)) {

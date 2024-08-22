@@ -11,13 +11,13 @@ if (!defined('TEMPLATE_DIR')) {
 
 // 日報ファイルの拡張子
 if (!defined('REPORT_FILE_EXTENSION')) {
-	define('REPORT_FILE_EXTENSION', '.md');
+    define('REPORT_FILE_EXTENSION', '.md');
 }
 
 // 日報ファイルのインデックスファイルパス。README.md に日報ファイルの一覧を記載する
 if (!defined('REPORT_INDEX_FILE')) {
-	define('REPORT_INDEX_FILE', APP_ROOT . DS . 'README' . REPORT_FILE_EXTENSION);
-	// define('REPORT_INDEX_FILE', REPORT_DIR . DS . 'README' . REPORT_FILE_EXTENSION);
+    define('REPORT_INDEX_FILE', APP_ROOT . DS . 'README' . REPORT_FILE_EXTENSION);
+    // define('REPORT_INDEX_FILE', REPORT_DIR . DS . 'README' . REPORT_FILE_EXTENSION);
 }
 
 // TodoistのAPIトークンを設定
@@ -57,4 +57,9 @@ if (!defined('YOUR_TOGGL_EMAIL')) {
 }
 if (!defined('YOUR_TOGGL_PASSWORD')) {
     define('YOUR_TOGGL_PASSWORD', '');
+}
+
+// 自動で run.php generate を実行するかどうか
+if (!defined('AUTO_RUN_GENERATE')) {
+    define('AUTO_RUN_GENERATE', false);
 }

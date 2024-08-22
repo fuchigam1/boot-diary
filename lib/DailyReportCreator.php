@@ -2,18 +2,24 @@
 require_once 'common.php';
 require_once 'Todoist.php';
 require_once 'Store.php';
+require_once 'GenerateFile.php';
 
 class DailyReportCreator
 {
     private string $dateFormat;
     private string $templatePath;
     private object $Store;
+    private bool $autoRunGenerate = false;
 
     public function __construct()
     {
         $this->dateFormat = 'Ymd';
         $this->templatePath = TEMPLATE_DIR . DS . 'new.template.md';
         $this->Store = new Store();
+
+        if (defined('AUTO_RUN_GENERATE')) {
+            $this->autoRunGenerate = AUTO_RUN_GENERATE;
+        }
     }
 
     public function execute($argv): void
@@ -47,6 +53,11 @@ class DailyReportCreator
         $dayOfWeek = getDayOfWeek((int)date('w', strtotime($date)));
         $templateContent = str_replace('{{date}}', date('Y-m-d', strtotime($date)), $templateContent);
         $templateContent = str_replace('{{day_of_week}}', $dayOfWeek, $templateContent);
+
+        if ($this->autoRunGenerate) {
+            $GenerateFile = new GenerateFile();
+            $GenerateFile->execute();
+        }
 
         // TODOISTのタスクを取得して追加する
         $Todoist = new Todoist();

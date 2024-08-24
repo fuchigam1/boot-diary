@@ -15,14 +15,23 @@ $Run = new Run($argv);
 $Run->exec();
 
 class Run {
-    private $allowCommand = [
+    private array $allowCommand = [
         'init',
         'new',
         'toggl',
         'format',
         'generate',
     ];
-    private $argv;
+
+    private array $commandAliases = [
+        'i' => 'init',
+        'n' => 'new',
+        't' => 'toggl',
+        'f' => 'format',
+        'g' => 'generate',
+    ];
+
+    private array $argv;
 
     public function __construct($argv) {
         $this->argv = $argv;
@@ -32,6 +41,11 @@ class Run {
         $this->init($this->argv);
 
         $command = $this->argv[1] ?? '';
+
+        // コマンドがエイリアスに該当するかチェックして、正規コマンドに変換する
+        if (isset($this->commandAliases[$command])) {
+            $command = $this->commandAliases[$command];
+        }
 
         switch ($command) {
             case 'init':
@@ -87,37 +101,14 @@ class Run {
      * @return void
      */
     private function checkEnviroment(array $argv): void {
-        // phpversion が 7.4 以上であることを確認する
-        if (version_compare(phpversion(), '7.4', '<')) {
-            // 現在のバージョンを表示する
-            echo getColorLog('現在のPHPバージョン: ' . phpversion() . PHP_EOL, 'warning');
-            echo getColorLog('PHPバージョンが7.4以上に対応しています' . PHP_EOL, 'warning');
-            exit;
-        }
+        Validation::checkPhpVersion();
+        Validation::checkSettingFile();
 
-        // setting.php が存在するかを確認する
-        if (!file_exists(APP_ROOT . DS . 'lib' . DS . 'setting.php')) {
-            echo getColorLog('php run.php init を実行してください' . PHP_EOL, 'error');
-            exit;
-        }
-
+        // 初期化時は各templeteファイルがまだ存在しない状態のためチェックしない
         if (isset($argv[1]) && $argv[1] === 'init') {
             return;
         }
-        // 各templateファイルが存在するかを確認する
-        $templateFiles = [
-            'format-footer.template.md',
-            'format-header.template.md',
-            'format.template.md',
-            'new.template.md',
-        ];
-        foreach ($templateFiles as $templateFile) {
-            $templatePath = TEMPLATE_DIR . DS . $templateFile;
-            if (!file_exists($templatePath)) {
-                echo getColorLog('php run.php init を実行してください' . PHP_EOL, 'error');
-                exit;
-            }
-        }
+        Validation::checkTemplateFiles();
     }
 
     /**
@@ -128,7 +119,13 @@ class Run {
      */
     private function checkArguments(array $argv): void {
         if (isset($argv[1])) {
-            if (!in_array($argv[1], $this->allowCommand, true)) {
+            $command = $argv[1];
+            // コマンドがエイリアスに該当するかチェックして、正規コマンドに変換する
+            if (isset($this->commandAliases[$command])) {
+                $command = $this->commandAliases[$command];
+            }
+
+            if (!in_array($command, $this->allowCommand, true)) {
                 echo getColorLog('実行できません' . PHP_EOL, 'error');
                 exit;
             }
@@ -162,6 +159,8 @@ class Run {
         $manual .= getColorLog('使い方: php run.php [command]' . PHP_EOL, 'info');
         $manual .= '利用可能なcommand' . PHP_EOL;
         $manual .= '  <non> ' . implode(' ', $this->allowCommand) . PHP_EOL;
+        $manual .= 'commandの短縮形（利用可能な command の頭文字）' . PHP_EOL;
+        $manual .= '   ' . implode(' ', array_keys($this->commandAliases)) . PHP_EOL;
         $manual .= 'command一覧' . PHP_EOL;
         $manual .= getColorLog('  - 初期化: run.php init' . PHP_EOL, 'info');
         $manual .= '    - 設置時初回だけ実行し、以降の実行は不要' . PHP_EOL;

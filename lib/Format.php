@@ -32,8 +32,7 @@ class Format
 
         if ($specifiedDate) {
             if (Validation::isValidDate($specifiedDate)) {
-                // Y-m-d 形式または Ymd 形式の日付を DateTime オブジェクトに変換
-                $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate) ?: DateTime::createFromFormat('Ymd', $specifiedDate);
+                $dateTime = convertDate($specifiedDate);
                 $dateToProcess = $dateTime->format('Ymd');
             } else {
                 echo getColorLog("無効な日付指定です: $specifiedDate" . PHP_EOL, 'error');

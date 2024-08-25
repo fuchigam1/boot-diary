@@ -149,3 +149,16 @@ function in(array $allowStringAry = null): string {
         return trim(fgets(STDIN));
     }
 }
+
+/**
+ * Y-m-d 形式、Ymd 形式、または Y/m/d 形式の日付を DateTime オブジェクトに変換
+ *
+ * @param string $specifiedDate
+ * @return DateTime
+ */
+function convertDate(string $specifiedDate): DateTime {
+    $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate)
+                ?: DateTime::createFromFormat('Ymd', $specifiedDate)
+                ?: DateTime::createFromFormat('Y/m/d', $specifiedDate);
+    return $dateTime;
+}

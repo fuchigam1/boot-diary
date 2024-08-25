@@ -49,16 +49,22 @@ class Validation {
     }
 
     /**
-     * 引数に指定された文字列が、有効な日司かどうかを判定する
+     * 引数に指定された文字列が、有効な日付かどうかを判定する
      *
      * @param string $date
      * @return boolean
      */
     public static function isValidDate(string $date): bool {
-        // Y-m-d 形式または Ymd 形式の日付を DateTime オブジェクトに変換
-        $dateTime = DateTime::createFromFormat('Y-m-d', $date) ?: DateTime::createFromFormat('Ymd', $date);
+        // Y-m-d 形式、Ymd 形式、または Y/m/d 形式の日付を DateTime オブジェクトに変換
+        $dateTime = DateTime::createFromFormat('Y-m-d', $date)
+                    ?: DateTime::createFromFormat('Ymd', $date)
+                    ?: DateTime::createFromFormat('Y/m/d', $date);
+
         // 日付が有効かどうかを確認
-        if ($dateTime && ($dateTime->format('Y-m-d') === $date || $dateTime->format('Ymd') === $date)) {
+        if ($dateTime && ($dateTime->format('Y-m-d') === $date ||
+            $dateTime->format('Ymd') === $date ||
+            $dateTime->format('Y/m/d') === $date)
+        ) {
             return true;
         }
         return false;

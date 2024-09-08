@@ -159,8 +159,6 @@ class Run {
         $manual .= getColorLog('使い方: php run.php [command]' . PHP_EOL, 'info');
         $manual .= '利用可能なcommand' . PHP_EOL;
         $manual .= '  <non> ' . implode(' ', $this->allowCommand) . PHP_EOL;
-        $manual .= 'commandの短縮形（利用可能な command の頭文字）' . PHP_EOL;
-        $manual .= '   ' . implode(' ', array_keys($this->commandAliases)) . PHP_EOL;
         $manual .= 'command一覧' . PHP_EOL;
         $manual .= getColorLog('  - 初期化: run.php init' . PHP_EOL, 'info');
         $manual .= '    - 設置時初回だけ実行し、以降の実行は不要' . PHP_EOL;
@@ -176,6 +174,8 @@ class Run {
         $manual .= '利用可能なオプション指定' . PHP_EOL;
         $manual .= '    - yyyy-mm-dd で日付を指定することで、対象日のファイルを操作する' . PHP_EOL;
         $manual .= '    - 指定可能なフォーマットは yyyymmdd 等、年月日として解釈可能な形式を利用可' . PHP_EOL;
+        $manual .= 'commandの短縮形（利用可能な command の頭文字）' . PHP_EOL;
+        $manual .= '   ' . implode(', ', array_keys($this->commandAliases)) . PHP_EOL;
         $manual .= 'templateの利用' . PHP_EOL;
         $manual .= '  - 日報ファイル用' . PHP_EOL;
         $manual .= '    - 新規作成時のフォーマットは new.template.md。'. getColorLog('「## 内容」箇所は消さないこと' . PHP_EOL, 'warning');

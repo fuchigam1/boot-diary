@@ -32,15 +32,20 @@ class Format
 
         if ($specifiedDate) {
             if (Validation::isValidDate($specifiedDate)) {
-                // Y-m-d 形式または Ymd 形式の日付を DateTime オブジェクトに変換
-                $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate) ?: DateTime::createFromFormat('Ymd', $specifiedDate);
+                $dateTime = convertDate($specifiedDate);
                 $dateToProcess = $dateTime->format('Ymd');
             } else {
                 echo getColorLog("無効な日付指定です: $specifiedDate" . PHP_EOL, 'error');
                 exit;
             }
         } else {
-            $dateToProcess = $this->today;
+            // 指定がない場合は最新の日報ファイルを取得
+            $dateToProcess = $this->Store->getLatestReportDate();
+
+            // 最新のファイルが見つからない場合は今日の日付を使用
+            if (!$dateToProcess) {
+                $dateToProcess = $this->today;
+            }
         }
 
         // ファイルパスの構築

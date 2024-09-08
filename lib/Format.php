@@ -40,7 +40,13 @@ class Format
                 exit;
             }
         } else {
-            $dateToProcess = $this->today;
+            // 指定がない場合は最新の日報ファイルを取得
+            $dateToProcess = $this->Store->getLatestReportDate();
+
+            // 最新のファイルが見つからない場合は今日の日付を使用
+            if (!$dateToProcess) {
+                $dateToProcess = $this->today;
+            }
         }
 
         // ファイルパスの構築

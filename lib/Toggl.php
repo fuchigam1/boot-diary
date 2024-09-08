@@ -1,18 +1,21 @@
 <?php
+
 require_once 'Store.php';
 /**
  * Toggl APIを使用してタイムエントリーを取得する連携用クラス
  *
  * @property Store $Store
  */
-class Toggl {
+class Toggl
+{
     private string $apiToken;
     private string $workspaceId;
     private array $projects;
     private string $dateFormat;
     private object $Store;
 
-    public function __construct() {
+    public function __construct()
+    {
         if (defined('YOUR_TOGGL_API_TOKEN') && !empty(YOUR_TOGGL_API_TOKEN)) {
             $this->apiToken = YOUR_TOGGL_API_TOKEN;
         } else {
@@ -32,7 +35,8 @@ class Toggl {
         $this->projects = $this->getProjects();
     }
 
-    public function execute($argv): void {
+    public function execute($argv): void
+    {
         if (!$this->apiToken || !$this->workspaceId) {
             return;
         }
@@ -117,7 +121,7 @@ class Toggl {
         }
 
         // $totalSeconds で降順ソート
-        usort($sortedEntries, function($a, $b) {
+        usort($sortedEntries, function ($a, $b) {
             return $b['totalSeconds'] - $a['totalSeconds'];
         });
 
@@ -143,7 +147,8 @@ class Toggl {
      * @return array
      * @link https://engineering.toggl.com/docs/reports/summary_reports#post-search-time-entries
      */
-    public function getTimeEntries(string $date): array {
+    public function getTimeEntries(string $date): array
+    {
         // メッセージを表示
         echo getColorLog("Togglから記録を取得しています。この処理には少し時間がかかるのでお待ちください" . PHP_EOL, 'notice');
 
@@ -202,7 +207,8 @@ class Toggl {
      *
      * @return array
      */
-    private function getProjects(): array {
+    private function getProjects(): array
+    {
         $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_toggl.json';
         if (!file_exists($filePath)) {
             echo getColorLog("Togglプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');
@@ -219,7 +225,8 @@ class Toggl {
      * @param int $seconds
      * @return int
      */
-    private function formatDuration(int $seconds): int {
+    private function formatDuration(int $seconds): int
+    {
         $minutes = $seconds / 60;
         return (int) floor($minutes);
     }

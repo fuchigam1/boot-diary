@@ -1,13 +1,16 @@
 <?php
+
 require_once 'common.php';
 /**
  * 日報ファイルの入出力管理用クラス
  */
-class Store {
+class Store
+{
     public string $reportsDir;
     public string $templateDir;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->reportsDir = REPORT_DIR;
         // reportsディレクトリが存在しない場合は作成する
         if (!file_exists($this->reportsDir)) {
@@ -28,7 +31,8 @@ class Store {
      * @param string $content
      * @return void
      */
-    public function saveReport(string $fileName, string $content): void {
+    public function saveReport(string $fileName, string $content): void
+    {
         $filePath = $this->reportsDir . DS . $fileName;
         file_put_contents($filePath, $content);
     }
@@ -39,7 +43,8 @@ class Store {
      * @param string $fileName
      * @return bool
      */
-    public function fileExists(string $fileName): bool {
+    public function fileExists(string $fileName): bool
+    {
         $filePath = $this->reportsDir . DS . $fileName;
         return file_exists($filePath);
     }
@@ -50,7 +55,8 @@ class Store {
      * @param string $fileName
      * @return string
      */
-    public function readReport(string $fileName): string {
+    public function readReport(string $fileName): string
+    {
         $filePath = $this->reportsDir . DS . $fileName;
         if ($this->fileExists($fileName)) {
             return file_get_contents($filePath);
@@ -64,7 +70,8 @@ class Store {
      * @param string $fileName
      * @return string
      */
-    public function readTemplate(string $fileName): string {
+    public function readTemplate(string $fileName): string
+    {
         $filePath = $this->templateDir . DS . $fileName;
         if (file_exists($filePath)) {
             return file_get_contents($filePath);

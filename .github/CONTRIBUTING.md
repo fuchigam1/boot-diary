@@ -6,6 +6,20 @@
 - 課題を解決したら、GitHubで プルリクエストを送信してください。
 
 
+## git cz
+
+プロジェクトでは [git-cz](https://github.com/streamich/git-cz) を使用して、コミットメッセージをフォーマットしています。  
+`git cz` コマンドを使うことで、セマンティックなコミットメッセージが簡単に書けます。  
+
+1. 導入  [git-cz](https://github.com/streamich/git-cz) を確認
+2. `git add` で変更をステージング
+3. `git cz` でガイドに従ってコミットメッセージを作成
+
+### 参考
+
+- Conventional Commits https://www.conventionalcommits.org/ja/v1.0.0/
+
+
 ## PHPStan
 
 プログラムは [PHPStan](https://phpstan.org/) により静的解析を行ってます。

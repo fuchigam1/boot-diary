@@ -72,4 +72,27 @@ class Store {
         return '';
     }
 
+    /**
+     * 最新の日報ファイルの日付を取得する
+     *
+     * @return string|null
+     */
+    public function getLatestReportDate(): ?string
+    {
+        $pattern = $this->reportsDir . DS . '*' . REPORT_FILE_EXTENSION;
+        $reports = glob($pattern);
+        if (!$reports) {
+            return null;  // ファイルがない場合
+        }
+
+        // ファイルを更新日時でソート（新しい順）
+        usort($reports, function ($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+
+        // 最新のファイル名から日付部分を抽出
+        $latestFile = basename($reports[0], REPORT_FILE_EXTENSION);
+        return $latestFile;
+    }
+
 }

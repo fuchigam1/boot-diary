@@ -46,8 +46,13 @@ class Toggl {
             }
             $date = date($this->dateFormat, strtotime($inputDate));
         } else {
-            // 引数が指定されていない場合は現在の日付を使用
-            $date = date($this->dateFormat);
+            // 引数がない場合、Storeクラスから最新の日付を取得
+            $date = $this->Store->getLatestReportDate();
+
+            // 最新ファイルがない場合、今日の日付を使用
+            if (!$date) {
+                $date = date($this->dateFormat);
+            }
         }
 
         $content = $this->Store->readReport($date . REPORT_FILE_EXTENSION);

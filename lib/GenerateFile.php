@@ -2,35 +2,51 @@
 /**
  * API連携用のファイルを生成するクラス
  */
-class GenerateFile {
+class GenerateFile
+{
     private string $workspaceId;
     private string $email;
     private string $password;
 
-    public function __construct() {
-        if (defined('YOUR_TOGGL_WORKSPACE_ID') && !empty(YOUR_TOGGL_WORKSPACE_ID)) {
-            $this->workspaceId = YOUR_TOGGL_WORKSPACE_ID;
-        } else {
+    public function __construct()
+    {
+        if (!defined('YOUR_TOGGL_WORKSPACE_ID')) {
             echo getColorLog("TogglワークスペースIDが設定されていません" . PHP_EOL, 'error');
             return;
         }
 
-        if (defined('YOUR_TOGGL_EMAIL') && !empty(YOUR_TOGGL_EMAIL)) {
-            $this->email = YOUR_TOGGL_EMAIL;
-        } else {
+        if (trim(YOUR_TOGGL_WORKSPACE_ID) === '') {
+            echo getColorLog("TogglワークスペースID設定に値が設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        if (!defined('YOUR_TOGGL_EMAIL')) {
             echo getColorLog("Togglメールアドレスが設定されていません" . PHP_EOL, 'error');
             return;
         }
 
-        if (defined('YOUR_TOGGL_PASSWORD') && !empty(YOUR_TOGGL_PASSWORD)) {
-            $this->password = YOUR_TOGGL_PASSWORD;
-        } else {
+        if (trim(YOUR_TOGGL_EMAIL) === '') {
+            echo getColorLog("Togglメールアドレス設定に値が設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        if (!defined('YOUR_TOGGL_PASSWORD')) {
             echo getColorLog("Togglパスワードが設定されていません" . PHP_EOL, 'error');
             return;
         }
+
+        if (trim(YOUR_TOGGL_PASSWORD) === '') {
+            echo getColorLog("Togglパスワード設定に値が設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        $this->workspaceId = YOUR_TOGGL_WORKSPACE_ID;
+        $this->email = YOUR_TOGGL_EMAIL;
+        $this->password = YOUR_TOGGL_PASSWORD;
     }
 
-    public function execute(): void {
+    public function execute(): void
+    {
         $this->getProjectsFromTodoist();
         $this->getProjectsFromToggl();
     }
@@ -40,7 +56,8 @@ class GenerateFile {
      *
      * @link https://engineering.toggl.com/docs/api/projects#get-workspaceprojects
      */
-    public function getProjectsFromToggl(): void {
+    public function getProjectsFromToggl(): void
+    {
         $url = "https://api.track.toggl.com/api/v9/workspaces/$this->workspaceId/projects";
         $projects = [];
         $page = 1;
@@ -84,9 +101,15 @@ class GenerateFile {
      *
      * @link https://developer.todoist.com/rest/v2/#get-all-projects
      */
-    public function getProjectsFromTodoist(): void {
-        if (!defined('YOUR_TODOIST_API_TOKEN') || empty(YOUR_TODOIST_API_TOKEN)) {
+    public function getProjectsFromTodoist(): void
+    {
+        if (!defined('YOUR_TODOIST_API_TOKEN')) {
             echo getColorLog("Todoist APIトークンが設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        if (trim(YOUR_TODOIST_API_TOKEN) === '') {
+            echo getColorLog("Todoist APIトークン設定に値が設定されていません" . PHP_EOL, 'error');
             return;
         }
 

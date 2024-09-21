@@ -1,19 +1,26 @@
 <?php
+
 /**
  * Todoist APIを利用してタスク一覧を取得する連携用クラス
  */
-class Todoist {
+class Todoist
+{
     private string $apiToken;
     private array $projects;
 
-    public function __construct() {
-        if (defined('YOUR_TODOIST_API_TOKEN') && !empty(YOUR_TODOIST_API_TOKEN)) {
-            $this->apiToken = YOUR_TODOIST_API_TOKEN;
-        } else {
+    public function __construct()
+    {
+        if (!defined('YOUR_TODOIST_API_TOKEN')) {
             echo getColorLog("Todoist APIトークンが設定されていません" . PHP_EOL, 'error');
             return;
         }
 
+        if (trim(YOUR_TODOIST_API_TOKEN) === '') {
+            echo getColorLog("Todoist APIトークン設定に値が設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        $this->apiToken = YOUR_TODOIST_API_TOKEN;
         $this->projects = $this->getProjects();
     }
 
@@ -22,7 +29,8 @@ class Todoist {
      *
      * @return array
      */
-    public function getTodoistTasks(): array {
+    public function getTodoistTasks(): array
+    {
         if (!$this->apiToken) {
             return [];
         }
@@ -132,7 +140,8 @@ class Todoist {
      *
      * @return array
      */
-    private function getProjects(): array {
+    private function getProjects(): array
+    {
         $filePath = APP_ROOT . DS . '.tmp' . DS . 'projects_todoist.json';
         if (!file_exists($filePath)) {
             echo getColorLog("Todoistプロジェクト一覧ファイルが見つかりません" . PHP_EOL, 'error');

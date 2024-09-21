@@ -1,12 +1,14 @@
 <?php
-class Validation {
 
+class Validation
+{
     /**
      * phpversion が 7.4 以上であることを確認する
      *
      * @return void
      */
-    public static function checkPhpVersion(): void {
+    public static function checkPhpVersion(): void
+    {
         if (version_compare(phpversion(), '7.4', '<')) {
             // 現在のバージョンを表示する
             echo getColorLog('現在のPHPバージョン: ' . phpversion() . PHP_EOL, 'warning');
@@ -20,7 +22,8 @@ class Validation {
      *
      * @return void
      */
-    public static function checkSettingFile(): void {
+    public static function checkSettingFile(): void
+    {
         if (!file_exists(APP_ROOT . DS . 'lib' . DS . 'setting.php')) {
             echo getColorLog('php run.php init を実行してください' . PHP_EOL, 'error');
             exit;
@@ -32,7 +35,8 @@ class Validation {
      *
      * @return void
      */
-    public static function checkTemplateFiles(): void {
+    public static function checkTemplateFiles(): void
+    {
         $templateFiles = [
             'format-footer.template.md',
             'format-header.template.md',
@@ -54,7 +58,8 @@ class Validation {
      * @param string $date
      * @return boolean
      */
-    public static function isValidDate(string $date): bool {
+    public static function isValidDate(string $date): bool
+    {
         // Y-m-d 形式、Ymd 形式、または Y/m/d 形式の日付を DateTime オブジェクトに変換
         $dateTime = DateTime::createFromFormat('Y-m-d', $date)
                     ?: DateTime::createFromFormat('Ymd', $date)

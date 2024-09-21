@@ -148,7 +148,8 @@ class Toggl
         // Storeクラスを使用してファイルに書き込み
         $this->Store->saveReport($filePath, $content);
 
-        echo getColorLog("Togglのタイムエントリーをファイルに追記しました: $filePath" . PHP_EOL, 'notice');
+        echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'info');
+        echo getColorLog($filePath . PHP_EOL, 'info');
     }
 
     /**

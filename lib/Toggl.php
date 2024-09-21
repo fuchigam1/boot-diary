@@ -59,7 +59,7 @@ class Toggl
             $date = date($this->dateFormat, strtotime($inputDate));
         } else {
             // 引数がない場合、Storeクラスから最新の日付を取得
-            $date = $this->Store->getLatestReportDate();
+            $date = $this->store->getLatestReportDate();
 
             // 最新ファイルがない場合、今日の日付を使用
             if (!$date) {
@@ -159,7 +159,7 @@ class Toggl
         $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);
 
         // Storeクラスを使用してファイルに書き込み
-        $this->Store->saveReport($filePath, $content);
+        $this->store->saveReport($filePath, $content);
 
         echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'info');
         echo getColorLog($filePath . PHP_EOL, 'info');

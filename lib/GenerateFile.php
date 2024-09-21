@@ -2,12 +2,14 @@
 /**
  * API連携用のファイルを生成するクラス
  */
-class GenerateFile {
+class GenerateFile
+{
     private string $workspaceId;
     private string $email;
     private string $password;
 
-    public function __construct() {
+    public function __construct()
+    {
         if (!defined('YOUR_TOGGL_WORKSPACE_ID')) {
             echo getColorLog("TogglワークスペースIDが設定されていません" . PHP_EOL, 'error');
             return;
@@ -43,7 +45,8 @@ class GenerateFile {
         $this->password = YOUR_TOGGL_PASSWORD;
     }
 
-    public function execute(): void {
+    public function execute(): void
+    {
         $this->getProjectsFromTodoist();
         $this->getProjectsFromToggl();
     }
@@ -53,7 +56,8 @@ class GenerateFile {
      *
      * @link https://engineering.toggl.com/docs/api/projects#get-workspaceprojects
      */
-    public function getProjectsFromToggl(): void {
+    public function getProjectsFromToggl(): void
+    {
         $url = "https://api.track.toggl.com/api/v9/workspaces/$this->workspaceId/projects";
         $projects = [];
         $page = 1;
@@ -97,7 +101,8 @@ class GenerateFile {
      *
      * @link https://developer.todoist.com/rest/v2/#get-all-projects
      */
-    public function getProjectsFromTodoist(): void {
+    public function getProjectsFromTodoist(): void
+    {
         if (!defined('YOUR_TODOIST_API_TOKEN')) {
             echo getColorLog("Todoist APIトークンが設定されていません" . PHP_EOL, 'error');
             return;

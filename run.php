@@ -1,4 +1,5 @@
 <?php
+
 require_once 'lib/common.php';
 require_once 'lib/Validation.php';
 require_once 'lib/Init.php';
@@ -14,7 +15,8 @@ require_once 'lib/Todoist.php';
 $Run = new Run($argv);
 $Run->exec();
 
-class Run {
+class Run
+{
     private array $allowCommand = [
         'init',
         'new',
@@ -33,11 +35,13 @@ class Run {
 
     private array $argv;
 
-    public function __construct($argv) {
+    public function __construct($argv)
+    {
         $this->argv = $argv;
     }
 
-    public function exec(): void {
+    public function exec(): void
+    {
         $this->init($this->argv);
 
         $command = $this->argv[1] ?? '';
@@ -89,7 +93,8 @@ class Run {
      * @param array $argv
      * @return void
      */
-    private function init(array $argv): void {
+    private function init(array $argv): void
+    {
         $this->checkEnviroment($argv);
         $this->checkArguments($argv);
     }
@@ -100,7 +105,8 @@ class Run {
      * @param array $argv
      * @return void
      */
-    private function checkEnviroment(array $argv): void {
+    private function checkEnviroment(array $argv): void
+    {
         Validation::checkPhpVersion();
         Validation::checkSettingFile();
 
@@ -117,7 +123,8 @@ class Run {
      * @param array $argv
      * @return void
      */
-    private function checkArguments(array $argv): void {
+    private function checkArguments(array $argv): void
+    {
         if (isset($argv[1])) {
             $command = $argv[1];
             // コマンドがエイリアスに該当するかチェックして、正規コマンドに変換する
@@ -137,7 +144,8 @@ class Run {
      *
      * @return string
      */
-    private function getManual(): string {
+    private function getManual(): string
+    {
         $manual = '';
         $manual .= '==================================================' . PHP_EOL;
         $manual .= 'boot-diary は日報の簡単作成を補助するツールです。以下のステップで完結できます。' . PHP_EOL;

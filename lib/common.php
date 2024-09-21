@@ -115,11 +115,14 @@ function getVersion(): string {
  *
  * @return void
  */
-function displayDots(): void {
+function displayDots(): void
+{
     echo getColorLog("[Now Loading] ", 'notice');
-    while (true) {
+    $counter = 0; // カウンターを追加
+    while ($counter < 50) {
         echo getColorLog(".", 'notice');
-        sleep(1); // 1秒ごとにドットを表示
+        usleep(300000); // 300ミリ秒ごとにドットを表示
+        $counter++;
     }
 }
 

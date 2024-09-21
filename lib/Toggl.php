@@ -12,26 +12,34 @@ class Toggl
     private string $workspaceId;
     private array $projects;
     private string $dateFormat;
-    private object $Store;
+    private Store $store;
 
     public function __construct()
     {
-        if (defined('YOUR_TOGGL_API_TOKEN') && !empty(YOUR_TOGGL_API_TOKEN)) {
-            $this->apiToken = YOUR_TOGGL_API_TOKEN;
-        } else {
+        if (!defined('YOUR_TOGGL_API_TOKEN')) {
             echo getColorLog("Toggl APIトークンが設定されていません" . PHP_EOL, 'error');
             return;
         }
 
-        if (defined('YOUR_TOGGL_WORKSPACE_ID') && !empty(YOUR_TOGGL_WORKSPACE_ID)) {
-            $this->workspaceId = YOUR_TOGGL_WORKSPACE_ID;
-        } else {
-            echo getColorLog("TogglワークスペースIDが設定されていません" . PHP_EOL, 'error');
+        if (trim(YOUR_TOGGL_API_TOKEN) === '') {
+            echo getColorLog("Toggl APIトークン設定に値が設定されていません" . PHP_EOL, 'error');
             return;
         }
 
-        $this->Store = new Store();
-        $this->dateFormat = 'Ymd';
+        if (!defined('YOUR_TOGGL_WORKSPACE_ID')) {
+            echo getColorLog("TogglワークスペースIDが設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+        if (trim(YOUR_TOGGL_WORKSPACE_ID) === '') {
+            echo getColorLog("TogglワークスペースID設定に値が設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        $this->apiToken = YOUR_TOGGL_API_TOKEN;
+        $this->workspaceId = YOUR_TOGGL_WORKSPACE_ID;
+        $this->dateFormat = 'Ymd'; // 日付フォーマットを設定
+        $this->store = new Store();
+
         $this->projects = $this->getProjects();
     }
 
@@ -87,8 +95,13 @@ class Toggl
         $entriesByProjectAndDescription = [];
         foreach ($timeEntries as $entry) {
             // タグがあるエントリーを除外
-            if (EXCLUDE_HASTAG_FOR_TOGGL && isset($entry['tag_ids']) && count($entry['tag_ids']) > 0) {
+            if (!defined('EXCLUDE_HASTAG_FOR_TOGGL')) {
                 continue;
+            }
+            if (EXCLUDE_HASTAG_FOR_TOGGL === true) {
+                if (isset($entry['tag_ids']) && count($entry['tag_ids']) > 0) {
+                    continue;
+                }
             }
 
             $projectName = isset($entry['project_id']) && isset($this->projects[$entry['project_id']]) ? $this->projects[$entry['project_id']] : 'Without project';

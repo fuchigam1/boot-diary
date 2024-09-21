@@ -7,13 +7,17 @@ class Todoist {
     private array $projects;
 
     public function __construct() {
-        if (defined('YOUR_TODOIST_API_TOKEN') && !empty(YOUR_TODOIST_API_TOKEN)) {
-            $this->apiToken = YOUR_TODOIST_API_TOKEN;
-        } else {
+        if (!defined('YOUR_TODOIST_API_TOKEN')) {
             echo getColorLog("Todoist APIトークンが設定されていません" . PHP_EOL, 'error');
             return;
         }
 
+        if (trim(YOUR_TODOIST_API_TOKEN) === '') {
+            echo getColorLog("Todoist APIトークン設定に値が設定されていません" . PHP_EOL, 'error');
+            return;
+        }
+
+        $this->apiToken = YOUR_TODOIST_API_TOKEN;
         $this->projects = $this->getProjects();
     }
 

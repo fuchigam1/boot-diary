@@ -39,6 +39,7 @@ class DailyReportCreator
         }
 
         $fileName = "$date" . REPORT_FILE_EXTENSION;
+        $filePath = $this->Store->reportsDir . DS . $fileName;
 
         if ($this->Store->fileExists($fileName)) {
             echo getColorLog("ファイル '$fileName' は既に存在します。上書きしますか？ (y/n): ", 'warning');
@@ -77,10 +78,10 @@ class DailyReportCreator
             $templateContent = str_replace(PHP_EOL . '{{todoist_tasks}}' . PHP_EOL, "", $templateContent);
         }
 
-        $this->Store->saveReport($fileName, $templateContent);  // Storeクラスを使用して保存
+        $this->Store->saveReport($filePath, $templateContent);  // Storeクラスを使用して保存
 
         echo getColorLog("日報ファイル '$fileName' を作成しました" . PHP_EOL, 'info');
-        echo getColorLog(REPORT_DIR . DS . $fileName . PHP_EOL, 'info');
+        echo getColorLog($filePath . PHP_EOL, 'info');
     }
 
 }

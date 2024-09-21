@@ -25,15 +25,21 @@ class Store
     }
 
     /**
-     * 指定したファイル名で、指定した内容を保存する
+     * 指定したファイルパスのファイルに、指定した内容を保存する
      *
-     * @param string $fileName
+     * @param string $filePath
      * @param string $content
      * @return void
      */
-    public function saveReport(string $fileName, string $content): void
+    public function saveReport(string $filePath, string $content): void
     {
-        $filePath = $this->reportsDir . DS . $fileName;
+        // ディレクトリが存在しない場合は作成
+        $directory = dirname($filePath);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        // ファイルに書き込み
         file_put_contents($filePath, $content);
     }
 

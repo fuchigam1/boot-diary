@@ -59,7 +59,18 @@ class Toggl
             }
         }
 
-        $content = $this->Store->readReport($date . REPORT_FILE_EXTENSION);
+        // ファイルパスの構築
+        $filePath = REPORT_DIR . DS . substr($date, 0, 4) . DS . substr($date, 4, 2) . DS . $date . REPORT_FILE_EXTENSION;
+        if (!file_exists($filePath)) {
+            // reports/直下のファイルを確認
+            $filePath = REPORT_DIR . DS . $date . REPORT_FILE_EXTENSION;
+            if (!file_exists($filePath)) {
+                echo getColorLog("記録する対象ファイルがありません: $filePath" . PHP_EOL, 'error');
+                return;
+            }
+        }
+
+        $content = file_get_contents($filePath);
 
         if (!$content) {
             $content = "## 内容\n";
@@ -135,9 +146,9 @@ class Toggl
         $content = str_replace("## 内容", $newContent . "\n\n## 内容", $content);
 
         // Storeクラスを使用してファイルに書き込み
-        $this->Store->saveReport($date . REPORT_FILE_EXTENSION, $content);
+        $this->Store->saveReport($filePath, $content);
 
-        echo getColorLog("Togglのタイムエントリーをファイルに追記しました" . PHP_EOL, 'notice');
+        echo getColorLog("Togglのタイムエントリーをファイルに追記しました: $filePath" . PHP_EOL, 'notice');
     }
 
     /**

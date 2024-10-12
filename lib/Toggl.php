@@ -178,7 +178,7 @@ class Toggl
         echo getColorLog("Togglから記録を取得しています。この処理には少し時間がかかるのでお待ちください" . PHP_EOL, 'notice');
 
         $startDate = date('Y-m-d', strtotime($date));
-        $endDate = date('Y-m-d', strtotime($date . ' +1 day'));
+        $endDate = $startDate;
 
         $url = "https://api.track.toggl.com/reports/api/v3/workspace/$this->workspaceId/search/time_entries";
 

@@ -1,4 +1,5 @@
 <?php
+
 ini_set('date.timezone', 'Asia/Tokyo');
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
@@ -24,7 +25,8 @@ if (file_exists($settingPath)) {
  * @link 色指定 https://misc.flogisoft.com/bash/tip_colors_and_formatting
  * @link 種別 https://www.php-fig.org/psr/psr-3/#5-psrlogloglevel
  */
-function getColorLog(string $str, $type = ''): string {
+function getColorLog(string $str, $type = ''): string
+{
     $string = '';
 
     // error = 'emergency' // Red
@@ -64,7 +66,8 @@ function getColorLog(string $str, $type = ''): string {
  * CLI実行かどうか判定する
  * @return boolean
  */
-function isCli(): bool {
+function isCli(): bool
+{
     if (PHP_SAPI === 'cli') {
         return true;
     }
@@ -74,7 +77,8 @@ function isCli(): bool {
 /**
  * htmlspecialcharsエイリアス
  */
-function h(string $str): string {
+function h(string $str): string
+{
     return htmlspecialchars($str);
 }
 
@@ -83,7 +87,8 @@ function h(string $str): string {
  * @param int $dayNumber
  * @return string
  */
-function getDayOfWeek(int $dayNumber): string {
+function getDayOfWeek(int $dayNumber): string
+{
     $daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
     return $daysOfWeek[$dayNumber];
 }
@@ -91,7 +96,8 @@ function getDayOfWeek(int $dayNumber): string {
 /**
  * バージョンを取得する
  */
-function getVersion(): string {
+function getVersion(): string
+{
     $versionNo = '';
 
     $path = APP_ROOT . DS . 'lib' . DS . 'VERSION.txt';
@@ -115,11 +121,14 @@ function getVersion(): string {
  *
  * @return void
  */
-function displayDots(): void {
+function displayDots(): void
+{
     echo getColorLog("[Now Loading] ", 'notice');
-    while (true) {
+    $counter = 0; // カウンターを追加
+    while ($counter < 50) {
         echo getColorLog(".", 'notice');
-        sleep(1); // 1秒ごとにドットを表示
+        usleep(300000); // 300ミリ秒ごとにドットを表示
+        $counter++;
     }
 }
 
@@ -130,7 +139,8 @@ function displayDots(): void {
  * @param array $allowStringAry
  * @return string
  */
-function in(array $allowStringAry = null): string {
+function in(array $allowStringAry = null): string
+{
     if ($allowStringAry) {
         $times = 0;
         while (1) {
@@ -156,7 +166,8 @@ function in(array $allowStringAry = null): string {
  * @param string $specifiedDate
  * @return DateTime
  */
-function convertDate(string $specifiedDate): DateTime {
+function convertDate(string $specifiedDate): DateTime
+{
     $dateTime = DateTime::createFromFormat('Y-m-d', $specifiedDate)
                 ?: DateTime::createFromFormat('Ymd', $specifiedDate)
                 ?: DateTime::createFromFormat('Y/m/d', $specifiedDate);

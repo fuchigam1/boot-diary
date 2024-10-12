@@ -1,4 +1,5 @@
 <?php
+
 require_once 'common.php';
 require_once 'Store.php';
 /**
@@ -114,7 +115,7 @@ class Format
         $years = glob($this->Store->reportsDir . DS . '[0-9]*', GLOB_ONLYDIR);
 
         // 作成日時でソート（新しい順）
-        usort($years, function($a, $b) {
+        usort($years, function ($a, $b) {
             return filemtime($b) - filemtime($a);
         });
 
@@ -126,7 +127,7 @@ class Format
             $months = glob($yearPath . DS . '*', GLOB_ONLYDIR);
 
             // 作成日時でソート（新しい順）
-            usort($months, function($a, $b) {
+            usort($months, function ($a, $b) {
                 return filemtime($b) - filemtime($a);
             });
 
@@ -178,7 +179,8 @@ class Format
      * @param string $basePath 基準となる絶対パス (README.md が存在するディレクトリ)
      * @return string
      */
-    private function convertToRelativePath(string $absolutePath, string $basePath): string {
+    private function convertToRelativePath(string $absolutePath, string $basePath): string
+    {
         // $absolutePath と $basePath を標準化
         $absolutePath = realpath($absolutePath);
         $basePath = realpath($basePath);

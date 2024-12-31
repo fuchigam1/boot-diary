@@ -22,3 +22,4 @@ build/*
 
 ## exclude files
 lib/setting.php
+update-version.sh

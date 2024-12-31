@@ -1,0 +1,17 @@
+## IDE files and folders
+.github/
+.github/*
+.phpdoc/
+.phpdoc/*
+.tmp/
+.tmp/*
+.vscode/
+.vscode/*
+.build/
+.build/*
+.reports/
+.reports/*
+
+## exclude files
+phpdoc.xml
+phpDocumentor.phar

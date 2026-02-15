@@ -52,7 +52,12 @@ class Todoist
             'Content-Type: application/json',
         ];
 
-        $ch = curl_init('https://api.todoist.com/rest/v2/tasks');
+        $baseUrl = 'https://api.todoist.com/api/v1/tasks';
+        $limit = 200;
+        $cursor = null;
+        $tasks = [];
+
+        $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -66,8 +71,43 @@ class Todoist
             displayDots();
             exit;
         } else {
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            do {
+                $query = ['limit' => $limit];
+                if ($cursor) {
+                    $query['cursor'] = $cursor;
+                }
+
+                $url = $baseUrl . '?' . http_build_query($query);
+                curl_setopt($ch, CURLOPT_URL, $url);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                if ($httpCode !== 200) {
+                    curl_close($ch);
+                    posix_kill($pid, SIGTERM);
+                    echo PHP_EOL;
+                    echo getColorLog("APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
+                    return [];
+                }
+
+                $decoded = json_decode($response, true);
+
+                if (isset($decoded['results']) && is_array($decoded['results'])) {
+                    foreach ($decoded['results'] as $t) {
+                        $tasks[] = $t;
+                    }
+                    $cursor = $decoded['next_cursor'] ?? null;
+                } elseif (is_array($decoded)) {
+                    foreach ($decoded as $t) {
+                        $tasks[] = $t;
+                    }
+                    $cursor = null;
+                } else {
+                    $cursor = null;
+                }
+            } while ($cursor);
+
             curl_close($ch);
 
             // 子プロセスを終了させる
@@ -76,13 +116,7 @@ class Todoist
             // cURLの処理が終わったら改行
             echo PHP_EOL;
 
-            if ($httpCode !== 200) {
-                echo getColorLog("APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
-                return [];
-            }
-
-            // 取得したタスクをデコード
-            $tasks = json_decode($response, true);
+            // $tasks は前段で集約済み
         }
 
         // 今日のタスクのみを取得
@@ -94,22 +128,25 @@ class Todoist
         foreach ($tasks as $task) {
             if (isset($task['due'])) {
                 // デフォルトのタイムゾーンを日本時間に設定
-                $timezone = new DateTimeZone('Asia/Tokyo');
+                $timezone = new \DateTimeZone('Asia/Tokyo');
 
                 if (isset($task['due']['datetime'])) {
                     // datetime がある場合
-                    $dueDateTime = new DateTime($task['due']['datetime'], $timezone);
+                    $dueDateTime = new \DateTime($task['due']['datetime'], $timezone);
                 } elseif (isset($task['due']['date'])) {
-                    // date のみがある場合
                     $dueDateString = $task['due']['date'];
-                    $dueDateTime = new DateTime($dueDateString . 'T00:00:00', $timezone);
+                    if (strpos($dueDateString, 'T') !== false || preg_match('/\d{2}:\d{2}/', $dueDateString)) {
+                        $dueDateTime = new \DateTime($dueDateString, $timezone);
+                    } else {
+                        $dueDateTime = new \DateTime($dueDateString . 'T00:00:00', $timezone);
+                    }
                 } else {
                     // due がない場合はスキップ
                     continue;
                 }
 
                 // 今日の開始と終了を設定
-                $today = new DateTime('today', $timezone);
+                $today = new \DateTime('today', $timezone);
                 $endOfDay = clone $today;
                 $endOfDay->setTime(23, 59, 59);
 

@@ -1,4 +1,8 @@
-1.0.13
+1.0.14
+
+[2026-07-08] 1.0.14
+- fix(api): Todoist取得を廃止APIから移行しcurl_close非推奨を解消
+- fix: Todoist APIのタスク取得処理を改善
 
 [2024-12-31] 1.0.13
 - chore: ignore調整

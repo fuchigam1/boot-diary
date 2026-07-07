@@ -84,7 +84,8 @@ class Todoist
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
                 if ($httpCode !== 200) {
-                    curl_close($ch);
+                    // curl_close は PHP 8.0 以降で無効・8.5 で非推奨のため unset で解放する（PHP 7/8 両対応）
+                    unset($ch);
                     posix_kill($pid, SIGTERM);
                     echo PHP_EOL;
                     echo getColorLog("APIリクエストが失敗しました。HTTPステータスコード: $httpCode" . PHP_EOL, 'error');
@@ -108,7 +109,8 @@ class Todoist
                 }
             } while ($cursor);
 
-            curl_close($ch);
+            // curl_close は PHP 8.0 以降で無効・8.5 で非推奨のため unset で解放する（PHP 7/8 両対応）
+            unset($ch);
 
             // 子プロセスを終了させる
             posix_kill($pid, SIGTERM);

@@ -212,7 +212,8 @@ class Toggl
             if (curl_errno($ch)) {
                 echo getColorLog('Error:' . curl_error($ch), 'error');
             }
-            curl_close($ch);
+            // curl_close は PHP 8.0 以降で無効・8.5 で非推奨のため unset で解放する（PHP 7/8 両対応）
+            unset($ch);
 
             // 子プロセスを終了させる
             posix_kill($pid, SIGTERM);
